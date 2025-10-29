@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Database
+*.db
+*.db-journal
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Project specific
+news_database.db
+news_collector.log
+ai_agent.log
+proxy.log
+ngrok.log
+rbc_news.html
