@@ -1,0 +1,1808 @@
+{
+  "comment": "Google News RSS (9 категорий) + Google News Search (243 темы: 115 тематик + 37 персоналий + 91 дополнительная тема, архив до 8 месяцев)",
+  "sources": [
+    {
+      "name": "Google News - Главное",
+      "url": "https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru",
+      "category": "general",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "Google News - Мир",
+      "url": "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx1YlY4U0FuSjFHZ0pTVlNnQVAB?hl=ru&gl=RU&ceid=RU:ru",
+      "category": "world",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "Google News - Россия",
+      "url": "https://news.google.com/rss/topics/CAAqIQgKIhtDQkFTRGdvSUwyMHZNRE55YXpBU0FuSjFLQUFQAQ?hl=ru&gl=RU&ceid=RU:ru",
+      "category": "local",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "Google News - Бизнес",
+      "url": "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx6TVdZU0FuSjFHZ0pTVlNnQVAB?hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "Google News - Технологии",
+      "url": "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVhZU0FuSjFHZ0pTVlNnQVAB?hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "Google News - Спорт",
+      "url": "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp1ZEdvU0FuSjFHZ0pTVlNnQVAB?hl=ru&gl=RU&ceid=RU:ru",
+      "category": "sports",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "Google News - Наука",
+      "url": "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp0Y1RjU0FuSjFHZ0pTVlNnQVAB?hl=ru&gl=RU&ceid=RU:ru",
+      "category": "science",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "Google News - Здоровье",
+      "url": "https://news.google.com/rss/topics/CAAqIQgKIhtDQkFTRGdvSUwyMHZNR3QwTlRFU0FuSjFLQUFQAQ?hl=ru&gl=RU&ceid=RU:ru",
+      "category": "health",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "Google News - Развлечения",
+      "url": "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNREpxYW5RU0FuSjFHZ0pTVlNnQVAB?hl=ru&gl=RU&ceid=RU:ru",
+      "category": "entertainment",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Сбербанк",
+      "url": "https://news.google.com/rss/search?q=Сбербанк+OR+Сбер&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ВТБ",
+      "url": "https://news.google.com/rss/search?q=ВТБ+OR+банк+ВТБ&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Альфа-Банк",
+      "url": "https://news.google.com/rss/search?q=Альфа-Банк+OR+Альфабанк&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Тинькофф",
+      "url": "https://news.google.com/rss/search?q=Тинькофф+OR+Tinkoff&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Центральный Банк",
+      "url": "https://news.google.com/rss/search?q=ЦБ+OR+Центробанк+OR+Набиуллина&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Ключевая ставка",
+      "url": "https://news.google.com/rss/search?q=ключевая+ставка+OR+ставка+ЦБ&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Инфляция",
+      "url": "https://news.google.com/rss/search?q=инфляция+OR+рост+цен&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Курс рубля",
+      "url": "https://news.google.com/rss/search?q=курс+рубля+OR+доллар+OR+евро&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "currency",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Кредитование",
+      "url": "https://news.google.com/rss/search?q=кредит+OR+кредитование+OR+займ&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Ипотека",
+      "url": "https://news.google.com/rss/search?q=ипотека+OR+ипотечный+кредит&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Газпром",
+      "url": "https://news.google.com/rss/search?q=Газпром&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Роснефть",
+      "url": "https://news.google.com/rss/search?q=Роснефть&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Лукойл",
+      "url": "https://news.google.com/rss/search?q=Лукойл&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Новатэк",
+      "url": "https://news.google.com/rss/search?q=Новатэк&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Цена на нефть",
+      "url": "https://news.google.com/rss/search?q=цена+на+нефть+OR+нефть+Brent+OR+Urals&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Цена на газ",
+      "url": "https://news.google.com/rss/search?q=цена+на+газ+OR+природный+газ&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Яндекс",
+      "url": "https://news.google.com/rss/search?q=Яндекс+OR+Yandex&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Wildberries",
+      "url": "https://news.google.com/rss/search?q=Wildberries+OR+Вайлдберриз+OR+Бакальчук&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Ozon",
+      "url": "https://news.google.com/rss/search?q=Ozon+OR+Озон&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Магнит",
+      "url": "https://news.google.com/rss/search?q=Магнит+OR+ритейл+Магнит&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - X5 Group",
+      "url": "https://news.google.com/rss/search?q=X5+Group+OR+Пятёрочка+OR+Перекрёсток&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Санкции против России",
+      "url": "https://news.google.com/rss/search?q=санкции+против+России+OR+экономические+санкции&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "politics",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Бюджет России",
+      "url": "https://news.google.com/rss/search?q=бюджет+России+OR+федеральный+бюджет&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Налоги",
+      "url": "https://news.google.com/rss/search?q=налоги+OR+налогообложение+OR+НДС&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Московская биржа",
+      "url": "https://news.google.com/rss/search?q=Московская+биржа+OR+MOEX&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Акции",
+      "url": "https://news.google.com/rss/search?q=акции+OR+фондовый+рынок&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Облигации",
+      "url": "https://news.google.com/rss/search?q=облигации+OR+ОФЗ&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Криптовалюта",
+      "url": "https://news.google.com/rss/search?q=криптовалюта+OR+биткоин+OR+блокчейн&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Золото",
+      "url": "https://news.google.com/rss/search?q=цена+на+золото+OR+золотовалютные+резервы&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Недвижимость",
+      "url": "https://news.google.com/rss/search?q=недвижимость+OR+цены+на+жильё&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ВВП России",
+      "url": "https://news.google.com/rss/search?q=ВВП+России+OR+экономический+рост&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Росстат",
+      "url": "https://news.google.com/rss/search?q=Росстат+OR+статистика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Экспорт",
+      "url": "https://news.google.com/rss/search?q=экспорт+OR+экспортные+поставки&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Импорт",
+      "url": "https://news.google.com/rss/search?q=импорт+OR+импортозамещение&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Китай экономика",
+      "url": "https://news.google.com/rss/search?q=Китай+экономика+OR+торговля+с+Китаем&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - США экономика",
+      "url": "https://news.google.com/rss/search?q=США+экономика+OR+ФРС&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Европа экономика",
+      "url": "https://news.google.com/rss/search?q=Европа+экономика+OR+ЕС+экономика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ОПЕК",
+      "url": "https://news.google.com/rss/search?q=ОПЕК+OR+ОПЕК+плюс&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Росатом",
+      "url": "https://news.google.com/rss/search?q=Росатом+OR+атомная+энергетика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Ростех",
+      "url": "https://news.google.com/rss/search?q=Ростех&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - РЖД",
+      "url": "https://news.google.com/rss/search?q=РЖД+OR+железные+дороги&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Аэрофлот",
+      "url": "https://news.google.com/rss/search?q=Аэрофлот+OR+авиаперевозки&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Мегафон",
+      "url": "https://news.google.com/rss/search?q=Мегафон+OR+MegaFon&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - МТС",
+      "url": "https://news.google.com/rss/search?q=МТС+OR+Mobile+TeleSystems&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Билайн",
+      "url": "https://news.google.com/rss/search?q=Билайн+OR+Beeline&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Норникель",
+      "url": "https://news.google.com/rss/search?q=Норникель+OR+Норильский+никель&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Северсталь",
+      "url": "https://news.google.com/rss/search?q=Северсталь&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - НЛМК",
+      "url": "https://news.google.com/rss/search?q=НЛМК+OR+Новолипецкий&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Полиметалл",
+      "url": "https://news.google.com/rss/search?q=Полиметалл&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ФосАгро",
+      "url": "https://news.google.com/rss/search?q=ФосАгро+OR+PhosAgro&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Уралкалий",
+      "url": "https://news.google.com/rss/search?q=Уралкалий+OR+Uralkali&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Polymetal",
+      "url": "https://news.google.com/rss/search?q=драгоценные+металлы+OR+добыча+золота&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Алроса",
+      "url": "https://news.google.com/rss/search?q=Алроса+OR+алмазы&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - АвтоВАЗ",
+      "url": "https://news.google.com/rss/search?q=АвтоВАЗ+OR+Lada&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - КамАЗ",
+      "url": "https://news.google.com/rss/search?q=КамАЗ+OR+KAMAZ&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Промышленность",
+      "url": "https://news.google.com/rss/search?q=промышленность+OR+производство&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Сельское хозяйство",
+      "url": "https://news.google.com/rss/search?q=сельское+хозяйство+OR+агропром&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Зерно",
+      "url": "https://news.google.com/rss/search?q=зерно+OR+пшеница+OR+экспорт+зерна&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Минфин",
+      "url": "https://news.google.com/rss/search?q=Минфин+OR+Министерство+финансов+OR+Силуанов&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Минэкономразвития",
+      "url": "https://news.google.com/rss/search?q=Минэкономразвития+OR+МЭР&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Банкротство",
+      "url": "https://news.google.com/rss/search?q=банкротство+OR+дефолт+OR+несостоятельность&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Инвестиции",
+      "url": "https://news.google.com/rss/search?q=инвестиции+OR+инвестиционные+проекты&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Венчурные инвестиции",
+      "url": "https://news.google.com/rss/search?q=венчурные+инвестиции+OR+стартапы&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - IPO",
+      "url": "https://news.google.com/rss/search?q=IPO+OR+размещение+акций&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - M&A сделки",
+      "url": "https://news.google.com/rss/search?q=слияния+и+поглощения+OR+M%26A&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Страхование",
+      "url": "https://news.google.com/rss/search?q=страхование+OR+страховые+компании&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Пенсионная система",
+      "url": "https://news.google.com/rss/search?q=пенсионная+система+OR+пенсии+OR+ПФР&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - МРОТ",
+      "url": "https://news.google.com/rss/search?q=МРОТ+OR+минимальная+зарплата&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Безработица",
+      "url": "https://news.google.com/rss/search?q=безработица+OR+рынок+труда&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Торговля",
+      "url": "https://news.google.com/rss/search?q=розничная+торговля+OR+ритейл&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - E-commerce",
+      "url": "https://news.google.com/rss/search?q=интернет-торговля+OR+e-commerce&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Логистика",
+      "url": "https://news.google.com/rss/search?q=логистика+OR+грузоперевозки&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Телекоммуникации",
+      "url": "https://news.google.com/rss/search?q=телекоммуникации+OR+связь+OR+5G&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ИТ-компании",
+      "url": "https://news.google.com/rss/search?q=ИТ-компании+OR+софтверные+компании&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Кибербезопасность",
+      "url": "https://news.google.com/rss/search?q=кибербезопасность+OR+хакеры+OR+утечка+данных&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Искусственный интеллект",
+      "url": "https://news.google.com/rss/search?q=искусственный+интеллект+OR+машинное+обучение+OR+ИИ&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Цифровизация",
+      "url": "https://news.google.com/rss/search?q=цифровизация+OR+цифровая+трансформация&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - SWIFT",
+      "url": "https://news.google.com/rss/search?q=SWIFT+OR+система+платежей&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - БРИКС",
+      "url": "https://news.google.com/rss/search?q=БРИКС+OR+BRICS&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ШОС",
+      "url": "https://news.google.com/rss/search?q=ШОС+OR+Шанхайская+организация&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ЕАЭС",
+      "url": "https://news.google.com/rss/search?q=ЕАЭС+OR+Евразийский+союз&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ВТО",
+      "url": "https://news.google.com/rss/search?q=ВТО+OR+Всемирная+торговая+организация&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - МВФ",
+      "url": "https://news.google.com/rss/search?q=МВФ+OR+Международный+валютный+фонд&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Нефтепереработка",
+      "url": "https://news.google.com/rss/search?q=нефтепереработка+OR+НПЗ&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Электроэнергетика",
+      "url": "https://news.google.com/rss/search?q=электроэнергетика+OR+ГЭС+OR+ТЭЦ&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Зеленая энергетика",
+      "url": "https://news.google.com/rss/search?q=зеленая+энергетика+OR+ВИЭ+OR+солнечные+панели&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Транспорт",
+      "url": "https://news.google.com/rss/search?q=транспортная+отрасль+OR+грузоперевозки&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Строительство",
+      "url": "https://news.google.com/rss/search?q=строительство+OR+стройкомплекс&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Туризм",
+      "url": "https://news.google.com/rss/search?q=туризм+OR+туристическая+отрасль&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Медицина бизнес",
+      "url": "https://news.google.com/rss/search?q=медицинский+бизнес+OR+фармацевтика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Госзакупки",
+      "url": "https://news.google.com/rss/search?q=госзакупки+OR+тендеры&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Приватизация",
+      "url": "https://news.google.com/rss/search?q=приватизация+OR+продажа+госактивов&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Антимонопольное регулирование",
+      "url": "https://news.google.com/rss/search?q=ФАС+OR+антимонопольное+регулирование&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Потребительские цены",
+      "url": "https://news.google.com/rss/search?q=потребительские+цены+OR+рост+цен+на+продукты&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Платежные системы",
+      "url": "https://news.google.com/rss/search?q=платежные+системы+OR+банковские+карты+OR+МИР&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Fintech",
+      "url": "https://news.google.com/rss/search?q=финтех+OR+финансовые+технологии&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Металлургия",
+      "url": "https://news.google.com/rss/search?q=металлургия+OR+сталь+OR+производство+металла&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Химическая промышленность",
+      "url": "https://news.google.com/rss/search?q=химическая+промышленность+OR+удобрения&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Лесная промышленность",
+      "url": "https://news.google.com/rss/search?q=лесная+промышленность+OR+экспорт+леса&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Рыболовство",
+      "url": "https://news.google.com/rss/search?q=рыболовство+OR+рыбная+отрасль&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "low",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Индия экономика",
+      "url": "https://news.google.com/rss/search?q=Индия+экономика+OR+India+economy&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Япония экономика",
+      "url": "https://news.google.com/rss/search?q=Япония+экономика+OR+Japan+economy&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Южная Корея экономика",
+      "url": "https://news.google.com/rss/search?q=Южная+Корея+экономика+OR+Korea+economy&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Турция экономика",
+      "url": "https://news.google.com/rss/search?q=Турция+экономика+OR+Turkey+economy&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Бразилия экономика",
+      "url": "https://news.google.com/rss/search?q=Бразилия+экономика+OR+Brazil+economy&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Саудовская Аравия",
+      "url": "https://news.google.com/rss/search?q=Саудовская+Аравия+OR+Saudi+Arabia&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ОАЭ",
+      "url": "https://news.google.com/rss/search?q=ОАЭ+OR+Эмираты+OR+Dubai&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Иран",
+      "url": "https://news.google.com/rss/search?q=Иран+экономика+OR+Iran&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Германия экономика",
+      "url": "https://news.google.com/rss/search?q=Германия+экономика+OR+Germany+economy&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Франция экономика",
+      "url": "https://news.google.com/rss/search?q=Франция+экономика+OR+France+economy&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Великобритания экономика",
+      "url": "https://news.google.com/rss/search?q=Великобритания+экономика+OR+UK+economy&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Казахстан",
+      "url": "https://news.google.com/rss/search?q=Казахстан+экономика+OR+Kazakhstan&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Беларусь",
+      "url": "https://news.google.com/rss/search?q=Беларусь+экономика+OR+Belarus&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Узбекистан",
+      "url": "https://news.google.com/rss/search?q=Узбекистан+экономика+OR+Uzbekistan&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Армения",
+      "url": "https://news.google.com/rss/search?q=Армения+экономика+OR+Armenia&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Путин",
+      "url": "https://news.google.com/rss/search?q=Путин+OR+Putin&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "politics",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Мишустин",
+      "url": "https://news.google.com/rss/search?q=Мишустин&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "politics",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Лавров",
+      "url": "https://news.google.com/rss/search?q=Лавров+OR+Lavrov&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "politics",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Набиуллина",
+      "url": "https://news.google.com/rss/search?q=Набиуллина+OR+Nabiullina&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Силуанов",
+      "url": "https://news.google.com/rss/search?q=Силуанов+OR+Siluanov&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Греф",
+      "url": "https://news.google.com/rss/search?q=Греф+OR+Gref&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Костин",
+      "url": "https://news.google.com/rss/search?q=Костин+ВТБ+OR+Kostin&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Потанин",
+      "url": "https://news.google.com/rss/search?q=Потанин+OR+Potanin&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Михельсон",
+      "url": "https://news.google.com/rss/search?q=Михельсон+Новатэк+OR+Mikhelson&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Алекперов",
+      "url": "https://news.google.com/rss/search?q=Алекперов+Лукойл+OR+Alekperov&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Тимченко",
+      "url": "https://news.google.com/rss/search?q=Тимченко+OR+Timchenko&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Дерипаска",
+      "url": "https://news.google.com/rss/search?q=Дерипаска+OR+Deripaska&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Усманов",
+      "url": "https://news.google.com/rss/search?q=Усманов+OR+Usmanov&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Прохоров",
+      "url": "https://news.google.com/rss/search?q=Прохоров+OR+Prokhorov&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Абрамович",
+      "url": "https://news.google.com/rss/search?q=Абрамович+OR+Abramovich&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Татьяна Бакальчук",
+      "url": "https://news.google.com/rss/search?q=Татьяна+Бакальчук+OR+Bakalchuk&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Владислав Бакальчук",
+      "url": "https://news.google.com/rss/search?q=Владислав+Бакальчук&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Волож",
+      "url": "https://news.google.com/rss/search?q=Волож+Яндекс+OR+Volozh&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Шефер",
+      "url": "https://news.google.com/rss/search?q=Шефер+Яндекс+OR+Shefer&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Дуров",
+      "url": "https://news.google.com/rss/search?q=Дуров+Telegram+OR+Durov&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Александр Шульгин Ozon",
+      "url": "https://news.google.com/rss/search?q=Шульгин+Ozon&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Трамп",
+      "url": "https://news.google.com/rss/search?q=Трамп+OR+Trump&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Байден",
+      "url": "https://news.google.com/rss/search?q=Байден+OR+Biden&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Си Цзиньпин",
+      "url": "https://news.google.com/rss/search?q=Си+Цзиньпин+OR+Xi+Jinping&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Моди",
+      "url": "https://news.google.com/rss/search?q=Моди+Индия+OR+Modi&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Эрдоган",
+      "url": "https://news.google.com/rss/search?q=Эрдоган+OR+Erdogan&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Макрон",
+      "url": "https://news.google.com/rss/search?q=Макрон+OR+Macron&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Шольц",
+      "url": "https://news.google.com/rss/search?q=Шольц+Германия+OR+Scholz&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Илон Маск",
+      "url": "https://news.google.com/rss/search?q=Илон+Маск+OR+Elon+Musk&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Джефф Безос",
+      "url": "https://news.google.com/rss/search?q=Безос+Amazon+OR+Jeff+Bezos&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Марк Цукерберг",
+      "url": "https://news.google.com/rss/search?q=Цукерберг+OR+Zuckerberg&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Билл Гейтс",
+      "url": "https://news.google.com/rss/search?q=Билл+Гейтс+OR+Bill+Gates&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Уоррен Баффет",
+      "url": "https://news.google.com/rss/search?q=Уоррен+Баффет+OR+Warren+Buffett&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Джером Пауэлл",
+      "url": "https://news.google.com/rss/search?q=Пауэлл+ФРС+OR+Jerome+Powell&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Лагард",
+      "url": "https://news.google.com/rss/search?q=Лагард+ЕЦБ+OR+Lagarde&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - АвтоВАЗ",
+      "url": "https://news.google.com/rss/search?q=АвтоВАЗ+OR+Lada&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - КамАЗ",
+      "url": "https://news.google.com/rss/search?q=КамАЗ+OR+Kamaz&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ГАЗ",
+      "url": "https://news.google.com/rss/search?q=ГАЗ+Группа+автомобиль&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Строительство",
+      "url": "https://news.google.com/rss/search?q=строительство+девелопмент+недвижимость&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Ритейл",
+      "url": "https://news.google.com/rss/search?q=ритейл+розничная+торговля&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Северсталь",
+      "url": "https://news.google.com/rss/search?q=Северсталь+OR+Severstal&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Норникель",
+      "url": "https://news.google.com/rss/search?q=Норникель+OR+Nornickel&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - НЛМК",
+      "url": "https://news.google.com/rss/search?q=НЛМК+OR+NLMK&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Evraz",
+      "url": "https://news.google.com/rss/search?q=Evraz+Евраз&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Агропром",
+      "url": "https://news.google.com/rss/search?q=агропром+сельское+хозяйство&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Фармацевтика",
+      "url": "https://news.google.com/rss/search?q=фармацевтика+лекарства+фарма&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - РЖД",
+      "url": "https://news.google.com/rss/search?q=РЖД+российские+железные+дороги&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - МТС",
+      "url": "https://news.google.com/rss/search?q=МТС+телеком&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Мегафон",
+      "url": "https://news.google.com/rss/search?q=Мегафон+OR+Megafon&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Билайн",
+      "url": "https://news.google.com/rss/search?q=Билайн+OR+Beeline&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Ростелеком",
+      "url": "https://news.google.com/rss/search?q=Ростелеком+OR+Rostelecom&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Аэрофлот",
+      "url": "https://news.google.com/rss/search?q=Аэрофлот+OR+Aeroflot&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - S7",
+      "url": "https://news.google.com/rss/search?q=S7+авиакомпания&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Туризм",
+      "url": "https://news.google.com/rss/search?q=туризм+путешествия+отели&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Логистика",
+      "url": "https://news.google.com/rss/search?q=логистика+перевозки+транспорт&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - IPO",
+      "url": "https://news.google.com/rss/search?q=IPO+размещение+акции&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - M&A",
+      "url": "https://news.google.com/rss/search?q=слияния+поглощения+M%26A&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Дивиденды",
+      "url": "https://news.google.com/rss/search?q=дивиденды+выплаты+акционерам&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Корпоративные облигации",
+      "url": "https://news.google.com/rss/search?q=корпоративные+облигации+выпуск&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Дефолт",
+      "url": "https://news.google.com/rss/search?q=дефолт+компании+невыплата&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Банкротство",
+      "url": "https://news.google.com/rss/search?q=банкротство+компании+процедура&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Реструктуризация долгов",
+      "url": "https://news.google.com/rss/search?q=реструктуризация+долг+кредит&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Кредитный рейтинг",
+      "url": "https://news.google.com/rss/search?q=кредитный+рейтинг+понижение+повышение&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Венчурные инвестиции",
+      "url": "https://news.google.com/rss/search?q=венчурные+инвестиции+стартапы&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Листинг",
+      "url": "https://news.google.com/rss/search?q=листинг+биржа+делистинг&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ФАС",
+      "url": "https://news.google.com/rss/search?q=ФАС+антимонопольная&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "politics",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Минфин",
+      "url": "https://news.google.com/rss/search?q=Минфин+министерство+финансов&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "politics",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ФНС",
+      "url": "https://news.google.com/rss/search?q=ФНС+налоговая&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "politics",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Счетная палата",
+      "url": "https://news.google.com/rss/search?q=Счетная+палата+аудит&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "politics",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Росстат",
+      "url": "https://news.google.com/rss/search?q=Росстат+статистика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "politics",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - МВФ",
+      "url": "https://news.google.com/rss/search?q=МВФ+OR+IMF&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Всемирный банк",
+      "url": "https://news.google.com/rss/search?q=Всемирный+банк+OR+World+Bank&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ВТО",
+      "url": "https://news.google.com/rss/search?q=ВТО+OR+WTO&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ЕАЭС",
+      "url": "https://news.google.com/rss/search?q=ЕАЭС+евразийский+союз&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - БРИКС",
+      "url": "https://news.google.com/rss/search?q=БРИКС+OR+BRICS&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ШОС",
+      "url": "https://news.google.com/rss/search?q=ШОС+шанхайская+организация&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Роспотребнадзор",
+      "url": "https://news.google.com/rss/search?q=Роспотребнадзор&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "politics",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Москва экономика",
+      "url": "https://news.google.com/rss/search?q=Москва+экономика+бизнес&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Санкт-Петербург экономика",
+      "url": "https://news.google.com/rss/search?q=Санкт-Петербург+экономика+бизнес&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Татарстан экономика",
+      "url": "https://news.google.com/rss/search?q=Татарстан+экономика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Башкортостан экономика",
+      "url": "https://news.google.com/rss/search?q=Башкортостан+экономика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Свердловская область",
+      "url": "https://news.google.com/rss/search?q=Свердловская+область+экономика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Краснодарский край",
+      "url": "https://news.google.com/rss/search?q=Краснодарский+край+экономика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Новосибирск экономика",
+      "url": "https://news.google.com/rss/search?q=Новосибирск+экономика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Екатеринбург экономика",
+      "url": "https://news.google.com/rss/search?q=Екатеринбург+экономика&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Искусственный интеллект",
+      "url": "https://news.google.com/rss/search?q=искусственный+интеллект+AI&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Блокчейн",
+      "url": "https://news.google.com/rss/search?q=блокчейн+blockchain&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Квантовые технологии",
+      "url": "https://news.google.com/rss/search?q=квантовые+технологии+компьютер&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - 5G и 6G",
+      "url": "https://news.google.com/rss/search?q=5G+OR+6G+сеть&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Облачные технологии",
+      "url": "https://news.google.com/rss/search?q=облачные+технологии+cloud&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Кибербезопасность",
+      "url": "https://news.google.com/rss/search?q=кибербезопасность+хакеры&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Big Data",
+      "url": "https://news.google.com/rss/search?q=Big+Data+большие+данные&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - IoT",
+      "url": "https://news.google.com/rss/search?q=IoT+интернет+вещей&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Робототехника",
+      "url": "https://news.google.com/rss/search?q=робототехника+роботы&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Беспилотный транспорт",
+      "url": "https://news.google.com/rss/search?q=беспилотный+автомобиль+транспорт&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Россельхозбанк",
+      "url": "https://news.google.com/rss/search?q=Россельхозбанк&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Промсвязьбанк",
+      "url": "https://news.google.com/rss/search?q=Промсвязьбанк&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ОТП Банк",
+      "url": "https://news.google.com/rss/search?q=ОТП+Банк&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Райффайзенбанк",
+      "url": "https://news.google.com/rss/search?q=Райффайзенбанк+OR+Raiffeisenbank&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Юникредит",
+      "url": "https://news.google.com/rss/search?q=Юникредит+OR+UniCredit&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Финтех",
+      "url": "https://news.google.com/rss/search?q=финтех+fintech&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Цифровые банки",
+      "url": "https://news.google.com/rss/search?q=цифровой+банк+необанк&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Open Banking",
+      "url": "https://news.google.com/rss/search?q=Open+Banking+открытые+API&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Зеленая энергетика",
+      "url": "https://news.google.com/rss/search?q=зеленая+энергетика+возобновляемая&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ESG",
+      "url": "https://news.google.com/rss/search?q=ESG+устойчивое+развитие&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Углеродный след",
+      "url": "https://news.google.com/rss/search?q=углеродный+след+выбросы&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Зеленые облигации",
+      "url": "https://news.google.com/rss/search?q=зеленые+облигации+green+bonds&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Экологические риски",
+      "url": "https://news.google.com/rss/search?q=экологические+риски+климат&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "business",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Bitcoin",
+      "url": "https://news.google.com/rss/search?q=Bitcoin+биткоин&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Ethereum",
+      "url": "https://news.google.com/rss/search?q=Ethereum+эфириум&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Регулирование криптовалют",
+      "url": "https://news.google.com/rss/search?q=регулирование+криптовалют+закон&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Майнинг",
+      "url": "https://news.google.com/rss/search?q=майнинг+криптовалюта&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "technology",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - DeFi",
+      "url": "https://news.google.com/rss/search?q=DeFi+децентрализованные+финансы&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "finance",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Безработица",
+      "url": "https://news.google.com/rss/search?q=безработица+рынок+труда&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Потребительский спрос",
+      "url": "https://news.google.com/rss/search?q=потребительский+спрос+покупки&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Промышленное производство",
+      "url": "https://news.google.com/rss/search?q=промышленное+производство+индекс&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Строительство жилья",
+      "url": "https://news.google.com/rss/search?q=строительство+жилья+ввод&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Розничная торговля",
+      "url": "https://news.google.com/rss/search?q=розничная+торговля+продажи&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Реальные доходы",
+      "url": "https://news.google.com/rss/search?q=реальные+доходы+населения&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Заработная плата",
+      "url": "https://news.google.com/rss/search?q=заработная+плата+зарплата&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Пенсии",
+      "url": "https://news.google.com/rss/search?q=пенсии+пенсионная+реформа&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "economy",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - G7",
+      "url": "https://news.google.com/rss/search?q=G7+большая+семерка&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GNS - G20",
+      "url": "https://news.google.com/rss/search?q=G20+большая+двадцатка&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ОПЕК+",
+      "url": "https://news.google.com/rss/search?q=ОПЕК+OR+OPEC&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "energy",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GNS - Парижское соглашение",
+      "url": "https://news.google.com/rss/search?q=Парижское+соглашение+климат&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "name": "GNS - ООН",
+      "url": "https://news.google.com/rss/search?q=ООН+организация+объединенных+наций&hl=ru&gl=RU&ceid=RU:ru",
+      "category": "international",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "name": "GDELT - Россия (все темы)",
+      "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcecountry:Russia&mode=artlist&maxrecords=250&timespan=1hour&format=rss",
+      "category": "general",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GDELT - Русский язык",
+      "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:Russian&mode=artlist&maxrecords=250&timespan=1hour&format=rss",
+      "category": "general",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GDELT - Россия финансы",
+      "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcecountry:Russia (bank OR finance OR economy OR санкции OR рубль)&mode=artlist&maxrecords=250&timespan=1hour&format=rss",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GDELT - Банки России",
+      "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcecountry:Russia (сбербанк OR втб OR центробанк OR альфа-банк OR тинькофф)&mode=artlist&maxrecords=250&timespan=2hour&format=rss",
+      "category": "finance",
+      "priority": "critical",
+      "enabled": true
+    },
+    {
+      "name": "GDELT - Энергетика РФ",
+      "url": "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcecountry:Russia (газпром OR роснефть OR лукойл OR нефть OR газ)&mode=artlist&maxrecords=250&timespan=2hour&format=rss",
+      "category": "energy",
+      "priority": "high",
+      "enabled": true
+    }
+  ],
+  "bank_keywords": {
+    "critical": [
+      "санкции", "ЦБ", "центробанк", "ключевая ставка", "инфляция",
+      "кредит", "валюта", "рубль", "доллар", "банкротство", "дефолт",
+      "лукойл", "роснефть", "газпром", "сбербанк", "втб", "альфа-банк",
+      "блокировка", "заморозка", "ограничения", "финансовые потери",
+      "НПЗ", "нефтепереработка", "нефть", "энергетика"
+    ],
+    "high": [
+      "экономика", "рынок", "биржа", "акции", "облигации", "процент",
+      "депозит", "вклад", "ипотека", "финансы", "бюджет", "налог",
+      "криптовалюта", "крипто", "биткоин", "дрон", "атака", "энергия"
+    ],
+    "exclude": [
+      "футбол", "хоккей", "баскетбол", "теннис", "спорт", "музыка",
+      "кино", "шоу-бизнес", "светская хроника", "celebrity"
+    ]
+  }
+}

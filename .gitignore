@@ -4,32 +4,33 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
+*.egg-info/
+
+# Virtual environments
 venv/
-ENV/
+env/
+upgini_env/
+anaconda_projects/
 
 # Database
 *.db
-*.db-journal
 
 # Logs
 *.log
 
+# GDELT data
+gdelt_2months/
+gdelt_api_test/
+gdelt_test/
+gdelt_test_raw/
+
 # Jupyter
 .ipynb_checkpoints/
-
-# OS
-.DS_Store
-Thumbs.db
+*.ipynb
 
 # IDE
 .vscode/
 .idea/
 
-# Project specific
-news_database.db
-news_collector.log
-ai_agent.log
-proxy.log
-ngrok.log
-rbc_news.html
+# OS
+.DS_Store
