@@ -255,28 +255,28 @@
         }
 
         .tag-person {
-            background: #E3F2FD;
-            color: #1565C0;
-            border: 1px solid #90CAF9;
+            background: #f5f9fc;
+            color: #6b8ba8;
+            border: 1px solid #d4e3f0;
         }
 
         .tag-organization {
-            background: #F3E5F5;
-            color: #6A1B9A;
-            border: 1px solid #CE93D8;
+            background: #faf7fb;
+            color: #9178a3;
+            border: 1px solid #e6dcec;
         }
 
         .tag-location {
-            background: #E8F5E9;
-            color: #2E7D32;
-            border: 1px solid #81C784;
+            background: #f7fbf8;
+            color: #6b9472;
+            border: 1px solid #d9ead9;
         }
 
         .tag-banking {
-            background: #FFF3E0;
-            color: #E65100;
-            border: 2px solid #FF9800;
-            font-weight: 600;
+            background: #fffbf5;
+            color: #c77a3a;
+            border: 1px solid #f5d9b8;
+            font-weight: 500;
         }
 
         .tag-banking::before {
@@ -341,6 +341,7 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -348,7 +349,9 @@
             <div class="header-content">
                 <div class="logo">
                     <div>
-                        <div class="logo-text">OTPNEWS</div>
+                        <div class="logo-text">
+                            <span style="color: #000;">OTP</span><span style="color: #00A651;">NEWS</span>
+                        </div>
                         <div class="logo-subtitle">Новостной агент ОТП Банка</div>
                     </div>
                 </div>
@@ -396,8 +399,8 @@
                 <button class="btn btn-secondary" onclick="loadLatest()">
                     <span>📰</span> Последние новости
                 </button>
-                <button class="btn btn-secondary" onclick="loadStats()">
-                    <span>📊</span> Обновить статистику
+                <button class="btn btn-secondary" onclick="showTrends()">
+                    <span>📈</span> Тренды NER
                 </button>
                 <button class="btn btn-secondary" onclick="updateNews()">
                     <span>🔄</span> Обновить источники
@@ -506,15 +509,8 @@
             hideError();
 
             try {
-                const response = await fetch(`${API_URL}/search`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        query: '',
-                        top_k: 20
-                    })
+                const response = await fetch(`${API_URL}/api/latest?limit=20`, {
+                    method: 'GET'
                 });
 
                 const data = await response.json();
@@ -671,6 +667,337 @@
             } catch (error) {
                 showError('Ошибка обновления: ' + error.message);
                 newsContainer.innerHTML = '';
+            }
+        }
+
+        // Глобальные переменные для сортировки
+        let trendsData = [];
+        let sortColumn = 'change_abs';
+        let sortDirection = 'desc';
+        let entityChart = null;
+        let selectedEntity = null;
+
+        // Функция отображения трендов
+        async function showTrends() {
+            showLoading();
+            hideError();
+
+            try {
+                const response = await fetch(`${API_URL}/api/trends/daily?top_n=10000`);
+                const data = await response.json();
+
+                trendsData = data.trends || [];
+
+                if (trendsData.length === 0) {
+                    document.getElementById('news-container').innerHTML =
+                        '<div style="text-align: center; color: #999; padding: 40px;">Нет данных о трендах</div>';
+                    return;
+                }
+
+                // Сортируем по умолчанию
+                sortTrendsData();
+                displayTrendsTable();
+
+            } catch (error) {
+                showError('Ошибка загрузки трендов: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Сортировка данных
+        function sortTrendsData() {
+            trendsData.sort((a, b) => {
+                let valA, valB;
+
+                switch(sortColumn) {
+                    case 'entity':
+                        valA = a.entity.toLowerCase();
+                        valB = b.entity.toLowerCase();
+                        break;
+                    case 'yesterday':
+                        valA = a.yesterday;
+                        valB = b.yesterday;
+                        break;
+                    case 'today':
+                        valA = a.today;
+                        valB = b.today;
+                        break;
+                    case 'change':
+                        valA = a.change;
+                        valB = b.change;
+                        break;
+                    case 'change_abs':
+                        valA = a.change_abs;
+                        valB = b.change_abs;
+                        break;
+                    default:
+                        valA = a.change_abs;
+                        valB = b.change_abs;
+                }
+
+                if (sortDirection === 'asc') {
+                    return valA > valB ? 1 : valA < valB ? -1 : 0;
+                } else {
+                    return valA < valB ? 1 : valA > valB ? -1 : 0;
+                }
+            });
+        }
+
+        // Отображение таблицы
+        function displayTrendsTable() {
+            const container = document.getElementById('news-container');
+
+            let html = '<div style="display: flex; gap: 20px; align-items: flex-start;">';
+
+            // Левая часть - таблица
+            html += '<div style="flex: 0 0 60%; max-width: 60%;">';
+            html += '<h2 style="color: #333; margin-bottom: 20px;">📈 Тренды NER (вчера → сегодня)</h2>';
+            html += '<p style="color: #666; margin-bottom: 20px;">Всего сущностей: ' + trendsData.length + '</p>';
+
+            html += '<div style="max-height: 80vh; overflow-y: auto;">';
+            html += '<table id="trends-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">';
+            html += '<thead style="position: sticky; top: 0; z-index: 10;"><tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">';
+            html += '<th style="padding: 12px; text-align: left;">#</th>';
+            html += getSortableHeader('entity', 'Сущность', 'left');
+            html += getSortableHeader('yesterday', 'Вчера', 'center');
+            html += getSortableHeader('today', 'Сегодня', 'center');
+            html += getSortableHeader('change', 'Изменение', 'center');
+            html += getSortableHeader('change_abs', '|Изменение|', 'center');
+            html += '</tr></thead><tbody>';
+
+            trendsData.forEach((trend, index) => {
+                const changeColor = trend.change > 0 ? '#10b981' : (trend.change < 0 ? '#ef4444' : '#999');
+                const changeIcon = trend.change > 0 ? '↑' : (trend.change < 0 ? '↓' : '→');
+                const bgColor = index % 2 === 0 ? '#fff' : '#fafafa';
+                const isSelected = selectedEntity === trend.entity;
+                const rowBg = isSelected ? '#e3f2fd' : bgColor;
+
+                html += `<tr onclick="showEntityDetail('${trend.entity.replace(/'/g, "\\'")}')" `;
+                html += `style="background: ${rowBg}; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s;" `;
+                html += `onmouseover="if('${trend.entity}' !== selectedEntity) this.style.background='#f0f0f0'" `;
+                html += `onmouseout="if('${trend.entity}' !== selectedEntity) this.style.background='${bgColor}'">`;
+                html += `<td style="padding: 12px; font-weight: bold; color: #666;">${index + 1}</td>`;
+                html += `<td style="padding: 12px; font-weight: 500;">${trend.entity}</td>`;
+                html += `<td style="padding: 12px; text-align: center;">${trend.yesterday}</td>`;
+                html += `<td style="padding: 12px; text-align: center; font-weight: bold;">${trend.today}</td>`;
+                html += `<td style="padding: 12px; text-align: center; font-weight: bold; color: ${changeColor};">`;
+                html += `${changeIcon} ${trend.change > 0 ? '+' : ''}${trend.change}`;
+                html += `</td>`;
+                html += `<td style="padding: 12px; text-align: center; font-weight: bold;">${trend.change_abs}</td>`;
+                html += `</tr>`;
+            });
+
+            html += '</tbody></table>';
+            html += '</div>'; // end scrollable container
+            html += '</div>'; // end left column
+
+            // Правая часть - панель детализации
+            html += '<div id="entity-detail-panel" style="flex: 1; position: sticky; top: 0; max-height: 90vh; overflow-y: auto;">';
+            if (!selectedEntity) {
+                html += '<div style="background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; color: #999;">';
+                html += '<p style="font-size: 18px;">👆 Выберите сущность из таблицы</p>';
+                html += '<p style="margin-top: 10px;">для просмотра детальной статистики</p>';
+                html += '</div>';
+            }
+            html += '</div>'; // end right column
+
+            html += '</div>'; // end flex container
+            container.innerHTML = html;
+        }
+
+        // Заголовок с сортировкой
+        function getSortableHeader(column, label, align) {
+            const arrow = sortColumn === column ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : '';
+            return `<th onclick="sortBy('${column}')" style="padding: 12px; text-align: ${align}; cursor: pointer; user-select: none; transition: background 0.2s;" onmouseover="this.style.background='#e5e5e5'" onmouseout="this.style.background='#f5f5f5'">${label}${arrow}</th>`;
+        }
+
+        // Сортировка по столбцу
+        function sortBy(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = column === 'entity' ? 'asc' : 'desc';
+            }
+            sortTrendsData();
+            displayTrendsTable();
+        }
+
+        // Показать детализацию сущности
+        async function showEntityDetail(entityName) {
+            selectedEntity = entityName;
+            displayTrendsTable();
+
+            const panel = document.getElementById('entity-detail-panel');
+            panel.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="spinner"></div></div>';
+
+            try {
+                // Параллельно загружаем timeline и новости
+                const [timelineData, newsData] = await Promise.all([
+                    fetch(`${API_URL}/api/entity/${encodeURIComponent(entityName)}/timeline?days=30`).then(r => r.json()),
+                    fetch(`${API_URL}/api/entity/${encodeURIComponent(entityName)}/news?limit=10`).then(r => r.json())
+                ]);
+
+                renderEntityDetail(entityName, timelineData, newsData);
+            } catch (error) {
+                panel.innerHTML = `<div style="background: white; padding: 20px; border-radius: 8px; color: #ef4444;">
+                    <p>Ошибка загрузки данных: ${error.message}</p>
+                </div>`;
+            }
+        }
+
+        // Отрисовка панели детализации
+        function renderEntityDetail(entityName, timelineData, newsData) {
+            const panel = document.getElementById('entity-detail-panel');
+
+            let html = '<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">';
+
+            // Заголовок
+            html += `<div style="border-bottom: 2px solid #e0e0e0; padding-bottom: 15px; margin-bottom: 20px;">`;
+            html += `<h3 style="margin: 0; color: #333; font-size: 20px;">${entityName}</h3>`;
+            html += `<p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Всего упоминаний: ${timelineData.total_mentions}</p>`;
+            html += `</div>`;
+
+            // График
+            html += '<div style="margin-bottom: 30px;">';
+            html += '<h4 style="margin: 0 0 15px 0; color: #555;">📊 Динамика упоминаний (30 дней)</h4>';
+            html += '<canvas id="entity-timeline-chart" style="max-height: 250px;"></canvas>';
+            html += '</div>';
+
+            // Новости
+            html += '<div>';
+            html += '<h4 style="margin: 0 0 15px 0; color: #555;">📰 Последние новости</h4>';
+
+            if (newsData.news && newsData.news.length > 0) {
+                html += '<div style="max-height: 400px; overflow-y: auto;">';
+                newsData.news.forEach(news => {
+                    const date = news.published ? new Date(news.published).toLocaleDateString('ru-RU') : '';
+                    html += `<div style="padding: 12px; margin-bottom: 10px; background: #f9f9f9; border-radius: 6px; border-left: 3px solid #2196F3;">`;
+                    html += `<div style="font-weight: 500; margin-bottom: 5px; color: #333;">${news.title}</div>`;
+                    if (news.description) {
+                        html += `<div style="font-size: 13px; color: #666; margin-bottom: 5px;">${news.description.substring(0, 150)}${news.description.length > 150 ? '...' : ''}</div>`;
+                    }
+                    html += `<div style="font-size: 12px; color: #999;">`;
+                    html += `<span>${news.source}</span>`;
+                    if (date) html += ` • <span>${date}</span>`;
+                    if (news.url) html += ` • <a href="${news.url}" target="_blank" style="color: #2196F3;">Читать</a>`;
+                    html += `</div>`;
+                    html += `</div>`;
+                });
+                html += '</div>';
+            } else {
+                html += '<p style="color: #999; text-align: center; padding: 20px;">Новости не найдены</p>';
+            }
+
+            html += '</div>';
+            html += '</div>';
+
+            panel.innerHTML = html;
+
+            // Рисуем график после того как DOM обновится
+            // Используем setTimeout чтобы canvas точно появился в DOM
+            setTimeout(() => {
+                renderChart(timelineData.timeline);
+            }, 50);
+        }
+
+        // Отрисовка графика
+        function renderChart(timeline) {
+            const ctx = document.getElementById('entity-timeline-chart');
+            if (!ctx) {
+                console.error('Canvas element not found for chart');
+                return;
+            }
+
+            // Уничтожаем старый график если есть
+            if (entityChart) {
+                try {
+                    entityChart.destroy();
+                } catch (e) {
+                    console.warn('Error destroying old chart:', e);
+                }
+                entityChart = null;
+            }
+
+            // Проверяем что у нас есть данные
+            if (!timeline || timeline.length === 0) {
+                console.warn('No timeline data to render');
+                return;
+            }
+
+            try {
+                const labels = timeline.map(t => {
+                    const date = new Date(t.date);
+                    return date.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' });
+                });
+                const data = timeline.map(t => t.count);
+
+                entityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Упоминания',
+                        data: data,
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const index = context[0].dataIndex;
+                                    const date = new Date(timeline[index].date);
+                                    return date.toLocaleDateString('ru-RU', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    });
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+            } catch (error) {
+                console.error('Error creating chart:', error);
+                // Показываем сообщение об ошибке в панели
+                const panel = document.getElementById('entity-detail-panel');
+                if (panel) {
+                    const errorMsg = document.createElement('div');
+                    errorMsg.style.cssText = 'color: #ef4444; padding: 10px; background: #fee; border-radius: 4px; margin: 10px 0;';
+                    errorMsg.textContent = 'Ошибка при отрисовке графика. Попробуйте выбрать сущность снова.';
+                    const chartContainer = document.querySelector('#entity-detail-panel > div');
+                    if (chartContainer) {
+                        chartContainer.insertBefore(errorMsg, chartContainer.firstChild);
+                    }
+                }
             }
         }
     </script>

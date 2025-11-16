@@ -16,8 +16,9 @@ from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
+import sqlite3
 
 from news_rag_system import NewsRAGSystem
 
@@ -607,6 +608,98 @@ async def search_news(request: SearchRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search error: {str(e)}")
 
+@app.get("/api/latest")
+async def get_latest_news(limit: int = 20):
+    """
+    Получить последние новости (отсортированные по дате публикации)
+    """
+    try:
+        import sqlite3
+        from email.utils import parsedate_to_datetime
+        from datetime import datetime as dt
+
+        conn = sqlite3.connect(rag.db_path)
+        cursor = conn.cursor()
+
+        # Получаем новости за последние 3 года (чтобы отсортировать по дате)
+        cursor.execute('''
+            SELECT id, title, description, link, source, published
+            FROM news
+            WHERE published LIKE '%2025%'
+               OR published LIKE '%2024%'
+               OR published LIKE '%2023%'
+        ''')
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        # Парсим даты и сортируем
+        news_with_dates = []
+        for row in rows:
+            news_id, title, description, link, source, published = row
+
+            try:
+                # Пробуем разные форматы дат
+                try:
+                    # RFC 2822 формат: "Tue, 12 Mar 2019 06:06:29 GMT"
+                    parsed_date = parsedate_to_datetime(published)
+                except:
+                    # Альтернативный формат: "14 Nov 2025 04:45:00 +0000"
+                    try:
+                        parsed_date = dt.strptime(published, "%d %b %Y %H:%M:%S %z")
+                    except:
+                        # Если не удалось распарсить, используем текущую дату минус ID
+                        parsed_date = dt(2000, 1, 1)
+
+                news_with_dates.append({
+                    'id': news_id,
+                    'title': title,
+                    'description': description,
+                    'link': link,
+                    'source': source,
+                    'published': published,
+                    'parsed_date': parsed_date
+                })
+            except Exception as e:
+                continue
+
+        # Сортируем по дате (от новых к старым)
+        news_with_dates.sort(key=lambda x: x['parsed_date'], reverse=True)
+
+        # Берем топ-N
+        top_news = news_with_dates[:limit]
+
+        news_items = []
+        for news_data in top_news:
+            # Загружаем NER-сущности для каждой новости
+            entities = get_news_entities_tags(news_data['id'])
+
+            news_items.append(NewsItem(
+                id=news_data['id'],
+                title=news_data['title'],
+                description=news_data['description'],
+                link=news_data['link'],
+                source=news_data['source'],
+                published=news_data['published'],
+                similarity=0.0,
+                keyword_score=0.0,
+                vector_score=0.0,
+                bank_boost=1.0,
+                critical_keywords=0,
+                geo_boost=1.0,
+                entities=entities
+            ))
+
+        return SearchResponse(
+            query="",
+            total_found=len(news_items),
+            news=news_items,
+            timestamp=datetime.now().isoformat()
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching latest news: {str(e)}")
+
 @app.post("/update")
 async def trigger_update(background_tasks: BackgroundTasks):
     """Запустить обновление новостей вручную (асинхронная версия)"""
@@ -877,6 +970,228 @@ async def get_entity_trends(days: int = 30, entity_type: Optional[str] = None, t
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching entity trends: {str(e)}")
+
+@app.get("/api/trends/daily")
+async def get_daily_trends(top_n: int = 20):
+    """
+    Получить топ-N трендов по изменению упоминаний (вчера vs сегодня)
+    Возвращает сущности с наибольшим изменением в абсолютном значении
+    """
+    try:
+        import sqlite3
+        from datetime import datetime, timedelta
+        from email.utils import parsedate_to_datetime
+
+        conn = sqlite3.connect(rag.db_path)
+        cursor = conn.cursor()
+
+        # Определяем сегодня и вчера
+        now = datetime.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        yesterday_start = today_start - timedelta(days=1)
+
+        # Получаем упоминания сущностей за сегодня
+        cursor.execute('''
+            SELECT e.normalized_text, COUNT(DISTINCT e.news_id) as count
+            FROM entities e
+            INNER JOIN news n ON e.news_id = n.id
+            WHERE e.normalized_text IS NOT NULL
+            GROUP BY e.normalized_text
+        ''')
+
+        all_entities = {}
+        for row in cursor.fetchall():
+            entity_name, count = row
+            all_entities[entity_name] = {'today': 0, 'yesterday': 0}
+
+        # Считаем упоминания по дням
+        cursor.execute('''
+            SELECT e.normalized_text, n.published
+            FROM entities e
+            INNER JOIN news n ON e.news_id = n.id
+            WHERE e.normalized_text IS NOT NULL
+        ''')
+
+        for row in cursor.fetchall():
+            entity_name, published = row
+
+            if entity_name not in all_entities:
+                all_entities[entity_name] = {'today': 0, 'yesterday': 0}
+
+            try:
+                # Парсим дату
+                try:
+                    pub_date = parsedate_to_datetime(published)
+                except:
+                    # Альтернативный формат
+                    pub_date = datetime.strptime(published, "%d %b %Y %H:%M:%S %z")
+
+                # Определяем день (сравниваем только даты, игнорируя время и timezone)
+                pub_date_only = pub_date.date() if hasattr(pub_date, 'date') else pub_date
+                today_only = today_start.date()
+                yesterday_only = yesterday_start.date()
+
+                if pub_date_only == today_only:
+                    all_entities[entity_name]['today'] += 1
+                elif pub_date_only == yesterday_only:
+                    all_entities[entity_name]['yesterday'] += 1
+            except:
+                continue
+
+        conn.close()
+
+        # Вычисляем изменения
+        trends = []
+        for entity_name, counts in all_entities.items():
+            today_count = counts['today']
+            yesterday_count = counts['yesterday']
+
+            # Пропускаем если нет упоминаний ни вчера, ни сегодня
+            if today_count == 0 and yesterday_count == 0:
+                continue
+
+            change = today_count - yesterday_count
+
+            trends.append({
+                'entity': entity_name,
+                'today': today_count,
+                'yesterday': yesterday_count,
+                'change': change,
+                'change_abs': abs(change)
+            })
+
+        # Сортируем по абсолютному изменению (наибольшие изменения вверху)
+        trends.sort(key=lambda x: x['change_abs'], reverse=True)
+
+        # Топ-N
+        top_trends = trends[:top_n]
+
+        return {
+            'trends': top_trends,
+            'total_entities': len(all_entities),
+            'timestamp': datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching daily trends: {str(e)}")
+
+@app.get("/api/entity/{entity_name}/timeline")
+async def get_entity_timeline(entity_name: str, days: int = 30):
+    """
+    Получить временной ряд упоминаний сущности по дням
+    """
+    try:
+        conn = sqlite3.connect(rag.db_path)
+        cursor = conn.cursor()
+
+        # Получаем все упоминания сущности с датами
+        cursor.execute('''
+            SELECT n.published
+            FROM news n
+            JOIN entities e ON n.id = e.news_id
+            WHERE LOWER(e.entity_text) = LOWER(?)
+            ORDER BY n.published DESC
+        ''', (entity_name,))
+
+        # Подсчитываем упоминания по дням
+        daily_counts = {}
+        all_dates = []
+
+        for row in cursor.fetchall():
+            pub_str = row[0]
+            if pub_str:
+                try:
+                    # Парсим разные форматы дат
+                    if pub_str.startswith(('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')):
+                        # RFC 2822 формат (из RSS): "Wed, 30 Apr 2025 07:00:00 GMT"
+                        from email.utils import parsedate_to_datetime
+                        pub_date = parsedate_to_datetime(pub_str)
+                    else:
+                        pub_date = datetime.fromisoformat(pub_str.replace('Z', '+00:00'))
+
+                    date_key = pub_date.date().isoformat()
+                    daily_counts[date_key] = daily_counts.get(date_key, 0) + 1
+                    all_dates.append(pub_date.date())
+                except Exception as e:
+                    # Логируем ошибки парсинга только для отладки
+                    # print(f"Could not parse date '{pub_str}': {e}")
+                    continue
+
+        conn.close()
+
+        # Если нет данных, возвращаем пустой график за последние N дней от сегодня
+        if not all_dates:
+            today = datetime.now().date()
+            timeline = []
+            for i in range(days - 1, -1, -1):
+                date = today - timedelta(days=i)
+                timeline.append({
+                    'date': date.isoformat(),
+                    'count': 0
+                })
+        else:
+            # Строим график от последней даты упоминания назад на N дней
+            latest_date = max(all_dates)
+            timeline = []
+
+            for i in range(days - 1, -1, -1):
+                date = latest_date - timedelta(days=i)
+                date_str = date.isoformat()
+                count = daily_counts.get(date_str, 0)
+                timeline.append({
+                    'date': date_str,
+                    'count': count
+                })
+
+        return {
+            'entity': entity_name,
+            'timeline': timeline,
+            'total_mentions': sum(daily_counts.values())
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching entity timeline: {str(e)}")
+
+@app.get("/api/entity/{entity_name}/news")
+async def get_entity_news(entity_name: str, limit: int = 20):
+    """
+    Получить новости с упоминанием данной сущности
+    """
+    try:
+        conn = sqlite3.connect(rag.db_path)
+        cursor = conn.cursor()
+
+        # Получаем новости с этой сущностью
+        cursor.execute('''
+            SELECT DISTINCT n.id, n.title, n.description, n.link, n.source, n.published
+            FROM news n
+            JOIN entities e ON n.id = e.news_id
+            WHERE LOWER(e.entity_text) = LOWER(?)
+            ORDER BY n.published DESC
+            LIMIT ?
+        ''', (entity_name, limit))
+
+        news_list = []
+        for row in cursor.fetchall():
+            news_list.append({
+                'id': row[0],
+                'title': row[1],
+                'description': row[2],
+                'url': row[3],
+                'source': row[4],
+                'published': row[5]
+            })
+
+        conn.close()
+
+        return {
+            'entity': entity_name,
+            'news': news_list,
+            'total': len(news_list)
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching entity news: {str(e)}")
 
 if __name__ == "__main__":
     uvicorn.run(
