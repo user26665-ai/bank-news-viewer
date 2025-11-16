@@ -239,6 +239,50 @@
             font-size: 15px;
         }
 
+        .news-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .tag-person {
+            background: #E3F2FD;
+            color: #1565C0;
+            border: 1px solid #90CAF9;
+        }
+
+        .tag-organization {
+            background: #F3E5F5;
+            color: #6A1B9A;
+            border: 1px solid #CE93D8;
+        }
+
+        .tag-location {
+            background: #E8F5E9;
+            color: #2E7D32;
+            border: 1px solid #81C784;
+        }
+
+        .tag-banking {
+            background: #FFF3E0;
+            color: #E65100;
+            border: 2px solid #FF9800;
+            font-weight: 600;
+        }
+
+        .tag-banking::before {
+            content: '🏦 ';
+        }
+
         .loading {
             text-align: center;
             padding: 60px 20px;
@@ -481,6 +525,18 @@
             }
         }
 
+        function renderEntityTags(entities) {
+            if (!entities || entities.length === 0) return '';
+
+            let tagsHTML = '<div class="news-tags">';
+            entities.forEach(entity => {
+                const tagClass = entity.is_banking ? 'tag-banking' : `tag-${entity.type}`;
+                tagsHTML += `<span class="tag ${tagClass}">${entity.text}</span>`;
+            });
+            tagsHTML += '</div>';
+            return tagsHTML;
+        }
+
         function displayNews(news, query) {
             const container = document.getElementById('news-container');
 
@@ -494,6 +550,7 @@
             news.forEach((item, index) => {
                 const relevance = (item.similarity * 100).toFixed(1);
                 const critical = item.critical_keywords > 0;
+                const entityTags = renderEntityTags(item.entities);
 
                 html += `
                     <div class="news-item" onclick="openNewsLink('${item.link}')">
@@ -505,6 +562,7 @@
                             ${critical ? '<span class="news-critical">⚠️ КРИТИЧНО</span>' : ''}
                         </div>
                         <div class="news-description">${item.description}</div>
+                        ${entityTags}
                     </div>
                 `;
             });
@@ -529,6 +587,7 @@
             data.top_news.forEach((item, index) => {
                 const relevance = (item.similarity * 100).toFixed(1);
                 const critical = item.critical_keywords > 0;
+                const entityTags = renderEntityTags(item.entities);
 
                 html += `
                     <div class="news-item" onclick="openNewsLink('${item.link}')">
@@ -540,6 +599,7 @@
                             ${critical ? `<span class="news-critical">⚠️ КРИТИЧНО (${item.critical_keywords})</span>` : ''}
                         </div>
                         <div class="news-description">${item.description}</div>
+                        ${entityTags}
                     </div>
                 `;
             });

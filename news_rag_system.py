@@ -18,16 +18,25 @@ import asyncio
 import httpx
 import re
 from html import unescape
+from news_ner import NewsNERExtractor
+from sentence_transformers import SentenceTransformer
 
 # Настройки
 DB_PATH = "/Users/david/bank_news_agent/news_database.db"
 SOURCES_PATH = "/Users/david/bank_news_agent/news_sources.json"
 LM_STUDIO_API = "http://localhost:1234/v1"
-EMBEDDING_MODEL = "text-embedding-nomic-embed-text-v1.5"
+EMBEDDING_MODEL = "BAAI/bge-m3"  # Изменено на BGE-M3
 
 class NewsRAGSystem:
     def __init__(self):
         self.db_path = DB_PATH
+        self.ner_extractor = NewsNERExtractor()
+
+        # Инициализация BGE-M3 модели
+        print("Загрузка BGE-M3 модели...")
+        self.embedding_model = SentenceTransformer(EMBEDDING_MODEL)
+        print("✓ BGE-M3 загружена")
+
         self.init_database()
 
     def init_database(self):
@@ -66,6 +75,33 @@ class NewsRAGSystem:
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_source ON news(source)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_category ON news(category)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_published ON news(published)')
+
+        # Таблица NER-сущностей
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS entities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                news_id INTEGER,
+                entity_text TEXT,
+                entity_type TEXT,
+                position INTEGER,
+                is_banking BOOLEAN DEFAULT 0,
+                FOREIGN KEY (news_id) REFERENCES news(id) ON DELETE CASCADE
+            )
+        ''')
+
+        # Добавляем поле normalized_text если его нет
+        cursor.execute("PRAGMA table_info(entities)")
+        entity_columns = [col[1] for col in cursor.fetchall()]
+
+        if 'normalized_text' not in entity_columns:
+            cursor.execute('ALTER TABLE entities ADD COLUMN normalized_text TEXT')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_normalized_text ON entities(normalized_text)')
+
+        # Индексы для быстрого поиска по сущностям
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_entity_text ON entities(entity_text)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_entity_type ON entities(entity_type)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_news_id ON entities(news_id)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_is_banking ON entities(is_banking)')
 
         conn.commit()
         conn.close()
@@ -177,42 +213,67 @@ class NewsRAGSystem:
             'real_source': real_source  # Реальный источник (СМИ)
         }
 
-    def get_embedding(self, text: str) -> np.ndarray:
-        """Получить embedding через LM Studio API"""
+    def save_entities(self, news_id: int, title: str, description: str, conn=None):
+        """
+        Извлечь и сохранить NER-сущности для новости
+
+        Args:
+            news_id: ID новости в БД
+            title: заголовок новости
+            description: описание новости
+            conn: существующее соединение с БД (опционально)
+        """
+        close_conn = False
+        if conn is None:
+            conn = sqlite3.connect(self.db_path)
+            close_conn = True
+
         try:
-            # Ограничиваем длину текста для API
+            cursor = conn.cursor()
+
+            # Извлекаем сущности
+            result = self.ner_extractor.extract_from_news(title, description)
+
+            # Сохраняем каждую сущность
+            for idx, entity in enumerate(result['all']):
+                is_banking = self.ner_extractor.is_banking_entity(entity['text'])
+                normalized = entity.get('normalized', entity['text'])
+
+                cursor.execute('''
+                    INSERT INTO entities (news_id, entity_text, entity_type, position, is_banking, normalized_text)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (news_id, entity['text'], entity['type'], idx, is_banking, normalized))
+
+            conn.commit()
+
+        except Exception as e:
+            print(f"Ошибка сохранения entities: {e}")
+
+        finally:
+            if close_conn:
+                conn.close()
+
+    def get_embedding(self, text: str) -> np.ndarray:
+        """Получить embedding через BGE-M3"""
+        try:
+            # Ограничиваем длину текста
             text = text[:8000]
 
-            response = requests.post(
-                f"{LM_STUDIO_API}/embeddings",
-                json={
-                    "model": EMBEDDING_MODEL,
-                    "input": text
-                },
-                timeout=30
-            )
-            if response.status_code == 200:
-                embedding = response.json()['data'][0]['embedding']
-                return np.array(embedding, dtype=np.float32)
+            # Используем BGE-M3 для создания эмбеддинга
+            embedding = self.embedding_model.encode(text, normalize_embeddings=True)
+            return np.array(embedding, dtype=np.float32)
         except Exception as e:
             print(f"Ошибка получения embedding: {e}")
         return None
 
 
     async def get_embedding_async(self, text: str, timeout: int = 30) -> Optional[np.ndarray]:
-        """Асинхронное получение embedding через LM Studio API"""
+        """Асинхронное получение embedding через BGE-M3"""
         try:
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                response = await client.post(
-                    f"{LM_STUDIO_API}/embeddings",
-                    json={
-                        "model": EMBEDDING_MODEL,
-                        "input": text[:8000]  # Ограничение для API
-                    }
-                )
-                if response.status_code == 200:
-                    embedding = response.json()['data'][0]['embedding']
-                    return np.array(embedding, dtype=np.float32)
+            # Запускаем синхронный метод в executor для асинхронности
+            loop = asyncio.get_event_loop()
+            embedding = await loop.run_in_executor(None, self.get_embedding, text[:8000])
+            return embedding
         except Exception as e:
             pass
         return None
@@ -435,6 +496,14 @@ class NewsRAGSystem:
                                 )
                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                             ''', result)
+
+                            # Получаем ID новой записи
+                            news_id = cursor.lastrowid
+
+                            # Извлекаем и сохраняем NER-сущности
+                            # result[3] = title, result[4] = description
+                            self.save_entities(news_id, result[3], result[4], conn)
+
                             new_count += 1
                             total_new += 1
                         except sqlite3.IntegrityError:

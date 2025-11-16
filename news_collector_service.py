@@ -43,6 +43,11 @@ class SearchRequest(BaseModel):
     top_k: int = 20
     category: Optional[str] = None
 
+class EntityTag(BaseModel):
+    text: str
+    type: str
+    is_banking: bool = False
+
 class NewsItem(BaseModel):
     id: int
     title: str
@@ -56,6 +61,7 @@ class NewsItem(BaseModel):
     bank_boost: Optional[float] = 1.0
     critical_keywords: Optional[int] = 0
     geo_boost: Optional[float] = 1.0
+    entities: Optional[List[EntityTag]] = []
 
 class SearchResponse(BaseModel):
     query: str
@@ -204,36 +210,87 @@ def calculate_recency_boost(published_date: str) -> float:
 
 
 def hybrid_search_internal(query: str, top_k: int = 20):
-    """Гибридный поиск с улучшениями: позиционный вес, query expansion, гео-буст, recency boost"""
+    """Гибридный поиск с улучшениями: позиционный вес, query expansion, NER-буст, recency boost"""
     import sqlite3
     import numpy as np
+    from news_ner import NewsNERExtractor
 
     # Query expansion
     expanded_keywords = expand_query(query)
 
-    stop_words = {'про', 'о', 'об', 'в', 'на', 'с', 'по', 'для', 'к', 'у', 'из', 'от', 'и', 'или', 'а', 'но', 'покажи', 'найди', 'дай'}
+    stop_words = {
+        # Предлоги и союзы
+        'про', 'о', 'об', 'в', 'на', 'с', 'по', 'для', 'к', 'у', 'из', 'от', 'и', 'или', 'а', 'но', 'за', 'перед', 'между', 'под', 'над',
+        # Команды
+        'покажи', 'найди', 'дай', 'ищи', 'смотри',
+    }
     keywords = [k for k in expanded_keywords if k not in stop_words and len(k) > 2]
+
+    # Извлекаем NER-сущности из запроса
+    ner_extractor = NewsNERExtractor()
+    query_entities = ner_extractor.extract_from_news(query, "")
+
+    # Создаем множество нормализованных NER-сущностей из запроса
+    query_ner_normalized = set()
+    for entity in query_entities['all']:
+        normalized = entity.get('normalized', entity['text'])
+        query_ner_normalized.add(normalized.lower())
 
     conn = sqlite3.connect(rag.db_path)
     cursor = conn.cursor()
 
     # Текстовый поиск с позиционным весом (без LOWER для поддержки русских букв)
     keyword_results = {}
-    for keyword in keywords:
-        # Ищем оба варианта: lowercase и capitalized
-        keyword_lower = keyword.lower()
-        keyword_cap = keyword.capitalize()
 
-        cursor.execute('''
+    import re
+    import pymorphy2
+
+    morph = pymorphy2.MorphAnalyzer()
+
+    def word_in_text(word: str, text: str) -> bool:
+        """Проверить что слово есть в тексте как целое слово (не подстрока)"""
+        # Регулярное выражение: границы слов вокруг ключевого слова
+        pattern = r'\b' + re.escape(word.lower()) + r'\b'
+        return bool(re.search(pattern, text.lower(), re.UNICODE))
+
+    def get_word_forms(word: str) -> set:
+        """Получить все формы слова (Путин, Путина, Путину, etc.)"""
+        forms = {word.lower()}  # Базовая форма
+
+        # Парсим слово и получаем все его формы
+        parsed = morph.parse(word)
+        if parsed:
+            lexeme = parsed[0].lexeme  # Все формы слова
+            for form in lexeme:
+                forms.add(form.word.lower())
+
+        return forms
+
+    for keyword in keywords:
+        # Получаем все морфологические формы слова заранее
+        word_forms = get_word_forms(keyword)
+
+        # Создаем SQL запрос со всеми формами слова
+        # Для каждой формы: lowercase и capitalized
+        like_conditions = []
+        like_params = []
+
+        for word_form in word_forms:
+            form_lower = word_form.lower()
+            form_cap = word_form.capitalize()
+            form_upper = word_form.upper()
+            like_conditions.append("title LIKE ? OR title LIKE ? OR title LIKE ?")
+            like_conditions.append("description LIKE ? OR description LIKE ? OR description LIKE ?")
+            like_conditions.append("full_text LIKE ? OR full_text LIKE ? OR full_text LIKE ?")
+            like_params.extend([f'%{form_lower}%', f'%{form_cap}%', f'%{form_upper}%'] * 3)
+
+        sql_query = f'''
             SELECT id, title, description, link, source, published, embedding, full_text
             FROM news
-            WHERE title LIKE ? OR title LIKE ?
-               OR description LIKE ? OR description LIKE ?
-               OR full_text LIKE ? OR full_text LIKE ?
-        ''', (f'%{keyword_lower}%', f'%{keyword_cap}%',
-              f'%{keyword_lower}%', f'%{keyword_cap}%',
-              f'%{keyword_lower}%', f'%{keyword_cap}%'))
+            WHERE {' OR '.join(like_conditions)}
+        '''
 
+        cursor.execute(sql_query, like_params)
         rows = cursor.fetchall()
 
         for row in rows:
@@ -241,6 +298,18 @@ def hybrid_search_internal(query: str, top_k: int = 20):
             title = row[1] or ''
             description = row[2] or ''
             full_text = row[7] or ''
+
+            # Проверяем что хотя бы одна форма слова есть как целое слово
+            found = False
+            for word_form in word_forms:
+                if (word_in_text(word_form, title) or
+                    word_in_text(word_form, description) or
+                    word_in_text(word_form, full_text)):
+                    found = True
+                    break
+
+            if not found:
+                continue  # Пропускаем если ни одна форма слова не найдена
 
             if news_id not in keyword_results:
                 keyword_results[news_id] = {
@@ -254,7 +323,7 @@ def hybrid_search_internal(query: str, top_k: int = 20):
                     'keyword_score': 0
                 }
 
-            # ПОЗИЦИОННЫЙ ВЕС
+            # ПОЗИЦИОННЫЙ ВЕС с NER-бустом
             position_weight = 0
 
             # Фразы (2+ слова) получают повышенный вес
@@ -263,30 +332,61 @@ def hybrid_search_internal(query: str, top_k: int = 20):
             desc_weight = 3.0 if is_phrase else 1.5
             text_weight = 2.0 if is_phrase else 1.0
 
-            if keyword.lower() in title.lower():
-                position_weight += title_weight  # Заголовок: фраза x10, слово x5
-            if keyword.lower() in description.lower():
-                position_weight += desc_weight  # Описание: фраза x3, слово x1.5
-            if keyword.lower() in full_text.lower():
-                position_weight += text_weight  # Полный текст: фраза x2, слово x1
+            # NER-буст: если ключевое слово является NER-сущностью из запроса
+            is_ner_entity = keyword.lower() in query_ner_normalized
+            ner_multiplier = 5.0 if is_ner_entity else 1.0
+
+            # Проверяем наличие любой морфологической формы слова
+            found_in_title = any(word_in_text(form, title) for form in word_forms)
+            found_in_description = any(word_in_text(form, description) for form in word_forms)
+            found_in_full_text = any(word_in_text(form, full_text) for form in word_forms)
+
+            if found_in_title:
+                position_weight += title_weight * ner_multiplier  # NER в заголовке: x5
+            if found_in_description:
+                position_weight += desc_weight * ner_multiplier  # NER в описании: x5
+            if found_in_full_text:
+                position_weight += text_weight * ner_multiplier  # NER в тексте: x5
 
             keyword_results[news_id]['keyword_score'] += position_weight
 
     # Буст за множественные совпадения в заголовке
     for news_id, data in keyword_results.items():
-        title = data['title'].lower()
-        # Считаем сколько ключевых слов из запроса есть в заголовке
-        matched_in_title = sum(1 for kw in keywords if kw.lower() in title)
+        title = data['title']
+        # Считаем сколько ключевых слов из запроса есть в заголовке (с учетом морф. форм)
+        matched_in_title = 0
+        for kw in keywords:
+            kw_forms = get_word_forms(kw)
+            if any(word_in_text(form, title) for form in kw_forms):
+                matched_in_title += 1
 
         if matched_in_title >= 2:
             # 2 слова -> x1.3, 3 слова -> x1.5, 4+ слов -> x1.7
             multi_match_boost = 1.0 + (matched_in_title - 1) * 0.3
             data['keyword_score'] *= multi_match_boost
 
+    # Дополнительный NER-буст: проверяем совпадение с реальными NER-сущностями из БД
+    if query_ner_normalized:
+        for news_id in keyword_results.keys():
+            cursor.execute('''
+                SELECT COUNT(DISTINCT normalized_text)
+                FROM entities
+                WHERE news_id = ? AND LOWER(normalized_text) IN ({})
+            '''.format(','.join('?' * len(query_ner_normalized))),
+            [news_id] + list(query_ner_normalized))
+
+            ner_matches = cursor.fetchone()[0]
+            if ner_matches > 0:
+                # Каждая совпавшая NER-сущность дает дополнительный буст x1.4
+                ner_match_boost = 1.0 + (ner_matches * 0.4)
+                keyword_results[news_id]['keyword_score'] *= ner_match_boost
+                keyword_results[news_id]['ner_matches'] = ner_matches
+
     # DEBUG: print(f"DEBUG: Total keyword_results: {len(keyword_results)}")
 
     # Векторный поиск
     query_embedding = rag.get_embedding(query)
+    print(f"DEBUG: query_embedding shape: {query_embedding.shape if query_embedding is not None else None}")
     vector_results = {}
 
     if query_embedding is not None:
@@ -440,6 +540,34 @@ async def get_stats():
         last_update=datetime.now().isoformat()
     )
 
+def get_news_entities_tags(news_id: int) -> List[EntityTag]:
+    """Получить NER-теги для новости"""
+    import sqlite3
+    try:
+        conn = sqlite3.connect(rag.db_path)
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT entity_text, entity_type, is_banking
+            FROM entities
+            WHERE news_id = ?
+            ORDER BY position
+        ''', (news_id,))
+
+        entities = []
+        for row in cursor.fetchall():
+            entities.append(EntityTag(
+                text=row[0],
+                type=row[1],
+                is_banking=bool(row[2])
+            ))
+
+        conn.close()
+        return entities
+    except Exception as e:
+        print(f"Error loading entities for news {news_id}: {e}")
+        return []
+
 @app.post("/search", response_model=SearchResponse)
 async def search_news(request: SearchRequest):
     """
@@ -448,8 +576,12 @@ async def search_news(request: SearchRequest):
     try:
         results = hybrid_search_internal(request.query, request.top_k)
 
-        news_items = [
-            NewsItem(
+        news_items = []
+        for item in results:
+            # Загружаем NER-сущности для каждой новости
+            entities = get_news_entities_tags(item['id'])
+
+            news_items.append(NewsItem(
                 id=item['id'],
                 title=item['title'],
                 description=item['description'],
@@ -461,10 +593,9 @@ async def search_news(request: SearchRequest):
                 vector_score=item.get('vector_score', 0),
                 bank_boost=item.get('bank_boost', 1.0),
                 critical_keywords=item.get('critical_keywords', 0),
-                geo_boost=item.get('geo_boost', 1.0)
-            )
-            for item in results
-        ]
+                geo_boost=item.get('geo_boost', 1.0),
+                entities=entities
+            ))
 
         return SearchResponse(
             query=request.query,
@@ -490,6 +621,262 @@ async def trigger_update(background_tasks: BackgroundTasks):
 
     background_tasks.add_task(update_news)
     return {"status": "update_started", "message": "Обновление запущено в фоне (async)"}
+
+@app.get("/entities/search/{entity_text}")
+async def search_by_entity(entity_text: str, limit: int = 20):
+    """
+    Найти новости, содержащие указанную NER-сущность
+    """
+    try:
+        import sqlite3
+        conn = sqlite3.connect(rag.db_path)
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT DISTINCT n.id, n.title, n.description, n.link, n.source, n.published
+            FROM news n
+            INNER JOIN entities e ON n.id = e.news_id
+            WHERE e.entity_text LIKE ?
+            ORDER BY n.published DESC
+            LIMIT ?
+        ''', (f'%{entity_text}%', limit))
+
+        news_items = []
+        for row in cursor.fetchall():
+            news_items.append({
+                'id': row[0],
+                'title': row[1],
+                'description': row[2],
+                'link': row[3],
+                'source': row[4],
+                'published': row[5]
+            })
+
+        conn.close()
+
+        return {
+            'entity': entity_text,
+            'total_found': len(news_items),
+            'news': news_items
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching by entity: {str(e)}")
+
+@app.get("/entities/stats")
+async def get_entities_stats():
+    """
+    Получить статистику по NER-сущностям
+    """
+    try:
+        import sqlite3
+        conn = sqlite3.connect(rag.db_path)
+        cursor = conn.cursor()
+
+        # Топ персон (группируем по нормализованной форме)
+        cursor.execute('''
+            SELECT normalized_text, COUNT(DISTINCT news_id) as count
+            FROM entities
+            WHERE entity_type = 'person' AND normalized_text IS NOT NULL
+            GROUP BY normalized_text
+            ORDER BY count DESC
+            LIMIT 10
+        ''')
+        top_persons = [{'name': row[0], 'count': row[1]} for row in cursor.fetchall()]
+
+        # Топ организаций (исключаем источники СМИ, группируем по нормализованной форме)
+        cursor.execute('''
+            SELECT e.normalized_text, COUNT(DISTINCT e.news_id) as count
+            FROM entities e
+            INNER JOIN news n ON e.news_id = n.id
+            WHERE e.entity_type = 'organization'
+            AND e.normalized_text IS NOT NULL
+            AND LOWER(e.entity_text) NOT LIKE '%' || LOWER(n.source) || '%'
+            AND LOWER(n.source) NOT LIKE '%' || LOWER(e.entity_text) || '%'
+            GROUP BY e.normalized_text
+            ORDER BY count DESC
+            LIMIT 10
+        ''')
+        top_organizations = [{'name': row[0], 'count': row[1]} for row in cursor.fetchall()]
+
+        # Топ локаций (группируем по нормализованной форме)
+        cursor.execute('''
+            SELECT normalized_text, COUNT(DISTINCT news_id) as count
+            FROM entities
+            WHERE entity_type = 'location' AND normalized_text IS NOT NULL
+            GROUP BY normalized_text
+            ORDER BY count DESC
+            LIMIT 10
+        ''')
+        top_locations = [{'name': row[0], 'count': row[1]} for row in cursor.fetchall()]
+
+        # Банковские сущности (исключаем источники СМИ, группируем по нормализованной форме)
+        cursor.execute('''
+            SELECT e.normalized_text, COUNT(DISTINCT e.news_id) as count
+            FROM entities e
+            INNER JOIN news n ON e.news_id = n.id
+            WHERE e.is_banking = 1
+            AND e.normalized_text IS NOT NULL
+            AND LOWER(e.entity_text) NOT LIKE '%' || LOWER(n.source) || '%'
+            AND LOWER(n.source) NOT LIKE '%' || LOWER(e.entity_text) || '%'
+            GROUP BY e.normalized_text
+            ORDER BY count DESC
+            LIMIT 10
+        ''')
+        banking_entities = [{'name': row[0], 'count': row[1]} for row in cursor.fetchall()]
+
+        # Общая статистика
+        cursor.execute('SELECT COUNT(DISTINCT entity_text) FROM entities')
+        total_unique_entities = cursor.fetchone()[0]
+
+        cursor.execute('SELECT COUNT(*) FROM entities')
+        total_entity_mentions = cursor.fetchone()[0]
+
+        conn.close()
+
+        return {
+            'total_unique_entities': total_unique_entities,
+            'total_mentions': total_entity_mentions,
+            'top_persons': top_persons,
+            'top_organizations': top_organizations,
+            'top_locations': top_locations,
+            'banking_entities': banking_entities
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching entity stats: {str(e)}")
+
+@app.get("/entities/id/{news_id}")
+async def get_news_entities(news_id: int):
+    """
+    Получить все NER-сущности для конкретной новости
+    """
+    try:
+        import sqlite3
+        conn = sqlite3.connect(rag.db_path)
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT entity_text, entity_type, is_banking
+            FROM entities
+            WHERE news_id = ?
+            ORDER BY position
+        ''', (news_id,))
+
+        entities = []
+        for row in cursor.fetchall():
+            entities.append({
+                'text': row[0],
+                'type': row[1],
+                'is_banking': bool(row[2])
+            })
+
+        conn.close()
+
+        return {
+            'news_id': news_id,
+            'entities': entities,
+            'total': len(entities)
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching entities: {str(e)}")
+
+@app.get("/entities/trends")
+async def get_entity_trends(days: int = 30, entity_type: Optional[str] = None, top_n: int = 10):
+    """
+    Получить тренды упоминания NER-сущностей за последние N дней
+
+    Args:
+        days: количество дней для анализа (по умолчанию 30)
+        entity_type: фильтр по типу сущности (person/organization/location)
+        top_n: количество топ сущностей для отображения
+    """
+    try:
+        import sqlite3
+        from datetime import datetime, timedelta
+        from email.utils import parsedate_to_datetime
+        from collections import defaultdict
+
+        conn = sqlite3.connect(rag.db_path)
+        cursor = conn.cursor()
+
+        # Вычисляем дату отсечки (делаем timezone-aware)
+        from datetime import timezone
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
+
+        # Получаем все новости с сущностями (исключаем источники новостей, группируем по нормализованной форме)
+        type_filter = f"AND e.entity_type = '{entity_type}'" if entity_type else ""
+
+        cursor.execute(f'''
+            SELECT e.normalized_text, n.published, e.news_id, n.source
+            FROM entities e
+            INNER JOIN news n ON e.news_id = n.id
+            WHERE e.normalized_text IS NOT NULL
+            {type_filter}
+        ''')
+
+        # Парсим даты и фильтруем
+        entity_mentions = defaultdict(lambda: defaultdict(set))
+
+        for row in cursor.fetchall():
+            normalized_text, published, news_id, source = row
+
+            # Пропускаем если сущность совпадает с источником (это название СМИ, а не упоминание)
+            if normalized_text.lower() in source.lower() or source.lower() in normalized_text.lower():
+                continue
+
+            try:
+                # Парсим дату из RFC 2822 формата
+                pub_date = parsedate_to_datetime(published)
+
+                # Фильтруем по дате
+                if pub_date >= cutoff_date:
+                    date_str = pub_date.strftime('%Y-%m-%d')
+                    entity_mentions[normalized_text][date_str].add(news_id)
+            except:
+                continue
+
+        # Получаем топ сущностей по общему количеству упоминаний
+        entity_totals = {}
+        for entity, dates_dict in entity_mentions.items():
+            total = sum(len(news_ids) for news_ids in dates_dict.values())
+            entity_totals[entity] = total
+
+        # Сортируем и берем топ N
+        top_entities = sorted(entity_totals.items(), key=lambda x: x[1], reverse=True)[:top_n]
+        top_entity_names = [entity for entity, _ in top_entities]
+
+        # Формируем список всех дат в диапазоне
+        dates = []
+        current_date = cutoff_date.date()
+        end_date = datetime.now().date()
+
+        while current_date <= end_date:
+            dates.append(current_date.strftime('%Y-%m-%d'))
+            current_date += timedelta(days=1)
+
+        # Формируем данные для графика
+        datasets = []
+        for entity in top_entity_names:
+            data = [len(entity_mentions[entity].get(date, set())) for date in dates]
+            datasets.append({
+                'label': entity,
+                'data': data
+            })
+
+        conn.close()
+
+        return {
+            'dates': dates,
+            'datasets': datasets,
+            'period_days': days,
+            'entity_type': entity_type or 'all',
+            'top_n': top_n
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching entity trends: {str(e)}")
 
 if __name__ == "__main__":
     uvicorn.run(
