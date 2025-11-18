@@ -312,10 +312,12 @@
             </div>
             <div class="actions">
                 <button class="action-btn" onclick="loadDataset()">📂 Загрузить датасет</button>
+                <button class="action-btn" onclick="mergeDatasets()" style="background: #8b5cf6;">🔗 Склеить датасеты</button>
                 <button class="action-btn" onclick="saveProgress()">💾 Сохранить прогресс</button>
                 <button class="action-btn" onclick="exportDataset()">📥 Экспортировать CSV</button>
                 <button id="retrain-btn" class="action-btn" onclick="retrainModel()" style="background: #f59e0b;">🔄 Переобучить модель</button>
             </div>
+            <input type="file" id="mergeFilesInput" accept=".json" multiple style="display: none;">
         </div>
 
         <!-- Результаты переобучения -->
@@ -435,6 +437,64 @@
             };
             reader.readAsText(file);
         });
+
+        // Склейка нескольких датасетов
+        document.getElementById('mergeFilesInput').addEventListener('change', async (event) => {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            try {
+                let allData = [...dataset];  // Текущий датасет
+                const seen = new Set(dataset.map(item => `${item.query}_${item.news_id}`));
+                let addedCount = 0;
+                let duplicatesCount = 0;
+
+                // Читаем все выбранные файлы
+                for (const file of files) {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+
+                    if (!Array.isArray(data)) {
+                        throw new Error(`Файл ${file.name} содержит неверный формат (ожидался массив)`);
+                    }
+
+                    // Добавляем только уникальные пары
+                    for (const item of data) {
+                        const key = `${item.query}_${item.news_id}`;
+                        if (!seen.has(key)) {
+                            allData.push(item);
+                            seen.add(key);
+                            addedCount++;
+                        } else {
+                            duplicatesCount++;
+                        }
+                    }
+                }
+
+                // Обновляем датасет
+                dataset = allData;
+
+                // Обновляем UI
+                updateUI();
+                updateStats();
+
+                // Показываем статистику
+                alert(`✅ Склейка завершена!\n\n` +
+                      `📊 Добавлено: ${addedCount} новых примеров\n` +
+                      `🔄 Пропущено дубликатов: ${duplicatesCount}\n` +
+                      `📦 Всего в датасете: ${dataset.length} примеров`);
+
+            } catch (err) {
+                alert('❌ Ошибка при склейке: ' + err.message);
+            }
+
+            // Сбрасываем input
+            event.target.value = '';
+        });
+
+        function mergeDatasets() {
+            document.getElementById('mergeFilesInput').click();
+        }
 
         // Отрисовка интерфейса
         function renderAnnotation() {
