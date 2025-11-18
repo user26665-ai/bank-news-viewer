@@ -461,15 +461,8 @@
             hideError();
 
             try {
-                const response = await fetch(`${API_URL}/search`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        query: '',
-                        top_k: 20
-                    })
+                const response = await fetch(`${API_URL}/api/latest?limit=20`, {
+                    method: 'GET'
                 });
 
                 const data = await response.json();
