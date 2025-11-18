@@ -1248,11 +1248,11 @@ async def retrain_ltr_model(request: RetrainRequest):
         from datetime import datetime
 
         # 1. Получаем старые feature importances
-        global rag_ltr
+        global rag
         old_importances = {}
-        if hasattr(rag_ltr, 'ltr_model') and rag_ltr.ltr_model:
-            feature_names = rag_ltr.feature_columns
-            importances = rag_ltr.ltr_model.feature_importances_
+        if hasattr(rag, 'ltr_model') and rag.ltr_model:
+            feature_names = rag.feature_columns
+            importances = rag.ltr_model.feature_importances_
             old_importances = {name: float(imp) for name, imp in zip(feature_names, importances)}
 
         # 2. Фильтруем только размеченные данные (label не null)
@@ -1357,8 +1357,8 @@ async def retrain_ltr_model(request: RetrainRequest):
             pickle.dump(model_data, f)
 
         # 9. Перезагружаем модель в памяти
-        rag_ltr.ltr_model = model
-        rag_ltr.feature_columns = feature_columns
+        rag.ltr_model = model
+        rag.feature_columns = feature_columns
 
         # 10. Вычисляем метрики на валидации
         from sklearn.metrics import ndcg_score
