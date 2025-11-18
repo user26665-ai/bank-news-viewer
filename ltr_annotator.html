@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTR Аннотатор - Разметка датасета</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #00a651, #00d163);
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #00a651;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .query-block {
+            background: #f0f4ff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 25px;
+        }
+
+        .query-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .query-meta {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .news-item {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .news-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .news-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .news-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .news-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+
+        .feature {
+            font-size: 12px;
+        }
+
+        .feature-name {
+            color: #666;
+        }
+
+        .feature-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .rating-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .rating-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .rating-btn.selected {
+            border-color: #00a651;
+            background: #00a651;
+            color: white;
+        }
+
+        .rating-btn.level-0 { border-color: #ef4444; }
+        .rating-btn.level-0.selected { background: #ef4444; border-color: #ef4444; }
+
+        .rating-btn.level-1 { border-color: #f59e0b; }
+        .rating-btn.level-1.selected { background: #f59e0b; border-color: #f59e0b; }
+
+        .rating-btn.level-2 { border-color: #10b981; }
+        .rating-btn.level-2.selected { background: #10b981; border-color: #10b981; }
+
+        .rating-btn.level-3 { border-color: #3b82f6; }
+        .rating-btn.level-3.selected { background: #3b82f6; border-color: #3b82f6; }
+
+        .hotkey {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 11px;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #666;
+        }
+
+        .selected .hotkey {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.prev {
+            background: #6c757d;
+            color: white;
+        }
+
+        .nav-btn.next {
+            background: #00a651;
+            color: white;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Learning to Rank - Аннотатор</h1>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-bar" style="width: 0%">
+                    <span id="progress-text">0%</span>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Всего</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="stat-annotated">0</div>
+                    <div class="stat-label">Размечено</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="stat-remaining">0</div>
+                    <div class="stat-label">Осталось</div>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="action-btn" onclick="loadDataset()">📂 Загрузить датасет</button>
+                <button class="action-btn" onclick="saveProgress()">💾 Сохранить прогресс</button>
+                <button class="action-btn" onclick="exportDataset()">📥 Экспортировать CSV</button>
+            </div>
+        </div>
+
+        <div class="card" id="annotation-card">
+            <div class="empty-state">
+                <h2>🎯 Готов к разметке!</h2>
+                <p>Нажмите "Загрузить датасет" чтобы начать</p>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="file-input" accept=".json" style="display: none;">
+
+    <script>
+        let dataset = [];
+        let currentIndex = 0;
+        let annotations = {};
+
+        // Загрузка датасета
+        function loadDataset() {
+            document.getElementById('file-input').click();
+        }
+
+        document.getElementById('file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    dataset = JSON.parse(event.target.result);
+                    // Загружаем сохраненный прогресс если есть
+                    const saved = localStorage.getItem('ltr_annotations');
+                    if (saved) {
+                        annotations = JSON.parse(saved);
+                    }
+                    currentIndex = 0;
+                    updateUI();
+                    console.log(`✅ Загружено ${dataset.length} записей`);
+                } catch (err) {
+                    alert('Ошибка загрузки файла: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Отрисовка интерфейса
+        function renderAnnotation() {
+            if (!dataset.length) return;
+
+            const item = dataset[currentIndex];
+            const key = `${item.query}_${item.news_id}`;
+            const currentLabel = annotations[key] !== undefined ? annotations[key] : item.label;
+
+            let html = '';
+
+            // Блок запроса
+            html += `<div class="query-block">`;
+            html += `<div class="query-text">🔍 ${item.query}</div>`;
+            html += `<div class="query-meta">Запрос ${currentIndex + 1} из ${dataset.length}</div>`;
+            html += `</div>`;
+
+            // Новость
+            html += `<div class="news-item">`;
+            html += `<div class="news-title">${item.title}</div>`;
+            if (item.description) {
+                html += `<div class="news-description">${item.description}</div>`;
+            }
+            html += `<div class="news-meta">`;
+            html += `<span>📰 ${item.source}</span>`;
+            if (item.published) {
+                html += `<span>📅 ${new Date(item.published).toLocaleDateString('ru-RU')}</span>`;
+            }
+            html += `<span>🔢 Ранг: ${item.rank}</span>`;
+            html += `</div>`;
+
+            // Фичи
+            html += `<div class="features">`;
+            for (const [name, value] of Object.entries(item.features)) {
+                const displayValue = typeof value === 'number' ? value.toFixed(3) : value;
+                html += `<div class="feature">`;
+                html += `<span class="feature-name">${name}:</span> `;
+                html += `<span class="feature-value">${displayValue}</span>`;
+                html += `</div>`;
+            }
+            html += `</div>`;
+
+            // Кнопки оценки
+            html += `<div class="rating-buttons">`;
+            for (let i = 0; i <= 3; i++) {
+                const labels = [
+                    '❌ Нерелевантна',
+                    '🤔 Слабо связана',
+                    '✅ Релевантна',
+                    '⭐ Идеально'
+                ];
+                const selected = currentLabel === i ? 'selected' : '';
+                html += `<button class="rating-btn level-${i} ${selected}" onclick="setRating(${i})">`;
+                html += `<div class="hotkey">${i}</div>`;
+                html += labels[i];
+                html += `</button>`;
+            }
+            html += `</div>`;
+
+            html += `</div>`;
+
+            // Навигация
+            html += `<div class="navigation">`;
+            html += `<button class="nav-btn prev" onclick="prevItem()" ${currentIndex === 0 ? 'disabled' : ''}>← Назад</button>`;
+            html += `<button class="nav-btn next" onclick="nextItem()" ${currentIndex === dataset.length - 1 ? 'disabled' : ''}>Вперед →</button>`;
+            html += `</div>`;
+
+            document.getElementById('annotation-card').innerHTML = html;
+        }
+
+        // Установка оценки
+        function setRating(rating) {
+            const item = dataset[currentIndex];
+            const key = `${item.query}_${item.news_id}`;
+            annotations[key] = rating;
+            item.label = rating;
+
+            // Автосохранение
+            localStorage.setItem('ltr_annotations', JSON.stringify(annotations));
+
+            updateUI();
+
+            // Автопереход к следующему
+            setTimeout(() => {
+                if (currentIndex < dataset.length - 1) {
+                    nextItem();
+                }
+            }, 200);
+        }
+
+        // Навигация
+        function nextItem() {
+            if (currentIndex < dataset.length - 1) {
+                currentIndex++;
+                updateUI();
+            }
+        }
+
+        function prevItem() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateUI();
+            }
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            renderAnnotation();
+            updateStats();
+        }
+
+        function updateStats() {
+            const total = dataset.length;
+            const annotated = Object.keys(annotations).length;
+            const remaining = total - annotated;
+            const progress = total > 0 ? (annotated / total * 100).toFixed(0) : 0;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-annotated').textContent = annotated;
+            document.getElementById('stat-remaining').textContent = remaining;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = progress + '%';
+        }
+
+        // Сохранение прогресса
+        function saveProgress() {
+            // Применяем аннотации к датасету
+            dataset.forEach(item => {
+                const key = `${item.query}_${item.news_id}`;
+                if (annotations[key] !== undefined) {
+                    item.label = annotations[key];
+                }
+            });
+
+            const blob = new Blob([JSON.stringify(dataset, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ltr_dataset_annotated_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            console.log('✅ Прогресс сохранен');
+        }
+
+        // Экспорт в CSV
+        function exportDataset() {
+            // Применяем аннотации
+            dataset.forEach(item => {
+                const key = `${item.query}_${item.news_id}`;
+                if (annotations[key] !== undefined) {
+                    item.label = annotations[key];
+                }
+            });
+
+            // Создаем CSV
+            let csv = 'query,news_id,label,';
+            const features = Object.keys(dataset[0].features);
+            csv += features.join(',') + '\n';
+
+            dataset.forEach(item => {
+                if (item.label === null || item.label === undefined) return; // Пропускаем неразмеченные
+
+                csv += `"${item.query}",${item.news_id},${item.label},`;
+                csv += features.map(f => item.features[f]).join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ltr_dataset_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            console.log('✅ Экспортировано в CSV');
+        }
+
+        // Горячие клавиши
+        document.addEventListener('keydown', (e) => {
+            if (!dataset.length) return;
+
+            // 0-3: оценки
+            if (e.key >= '0' && e.key <= '3') {
+                setRating(parseInt(e.key));
+            }
+            // Стрелки: навигация
+            else if (e.key === 'ArrowLeft') {
+                prevItem();
+            }
+            else if (e.key === 'ArrowRight') {
+                nextItem();
+            }
+            // S: сохранить
+            else if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                saveProgress();
+            }
+        });
+
+        // Автозагрузка из localStorage при запуске
+        window.addEventListener('load', () => {
+            updateStats();
+        });
+    </script>
+</body>
+</html>
