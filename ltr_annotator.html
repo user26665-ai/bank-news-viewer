@@ -391,15 +391,44 @@
             const reader = new FileReader();
             reader.onload = (event) => {
                 try {
-                    dataset = JSON.parse(event.target.result);
-                    // Загружаем сохраненный прогресс если есть
-                    const saved = localStorage.getItem('ltr_annotations');
-                    if (saved) {
-                        annotations = JSON.parse(saved);
+                    const loadedData = JSON.parse(event.target.result);
+
+                    // Проверяем, есть ли уже размеченные данные в файле
+                    const hasLabels = loadedData.some(item => item.label !== null && item.label !== undefined);
+
+                    if (hasLabels) {
+                        // Загружаем размеченные данные напрямую
+                        dataset = loadedData;
+
+                        // Считаем статистику
+                        const labeledCount = dataset.filter(item => item.label !== null && item.label !== undefined).length;
+                        const unlabeledCount = dataset.length - labeledCount;
+
+                        // Находим первый неразмеченный элемент
+                        const firstUnlabeled = dataset.findIndex(item => item.label === null || item.label === undefined);
+                        currentIndex = firstUnlabeled >= 0 ? firstUnlabeled : 0;
+
+                        // Сохраняем в localStorage
+                        localStorage.setItem('ltr_dataset', JSON.stringify(dataset));
+
+                        console.log(`✅ Загружено ${dataset.length} записей (${labeledCount} размечено, ${unlabeledCount} осталось)`);
+                        alert(`Загружен размеченный датасет!\n\n📊 Всего: ${dataset.length}\n✅ Размечено: ${labeledCount}\n⏳ Осталось: ${unlabeledCount}\n\nПродолжим с записи #${currentIndex + 1}`);
+                    } else {
+                        // Загружаем неразмеченный датасет
+                        dataset = loadedData;
+
+                        // Пытаемся загрузить сохраненный прогресс из localStorage
+                        const saved = localStorage.getItem('ltr_annotations');
+                        if (saved) {
+                            annotations = JSON.parse(saved);
+                        }
+
+                        currentIndex = 0;
+                        console.log(`✅ Загружено ${dataset.length} записей (неразмеченных)`);
                     }
-                    currentIndex = 0;
+
                     updateUI();
-                    console.log(`✅ Загружено ${dataset.length} записей`);
+                    updateStats();
                 } catch (err) {
                     alert('Ошибка загрузки файла: ' + err.message);
                 }
@@ -519,7 +548,17 @@
 
         function updateStats() {
             const total = dataset.length;
-            const annotated = Object.keys(annotations).length;
+
+            // Подсчет размеченных: проверяем и annotations, и dataset[].label
+            let annotated = 0;
+            dataset.forEach((item, idx) => {
+                const key = `${item.query}_${item.news_id}`;
+                // Проверяем: либо есть в annotations, либо label прямо в dataset
+                if (annotations[key] !== undefined || (item.label !== null && item.label !== undefined)) {
+                    annotated++;
+                }
+            });
+
             const remaining = total - annotated;
             const progress = total > 0 ? (annotated / total * 100).toFixed(0) : 0;
 
