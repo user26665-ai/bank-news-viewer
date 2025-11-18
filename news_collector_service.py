@@ -1205,6 +1205,28 @@ async def get_entity_news(entity_name: str, limit: int = 20):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching entity news: {str(e)}")
 
+@app.post("/api/ltr/generate_candidates")
+async def generate_ltr_candidates(request: SearchRequest):
+    """
+    Генерирует кандидатов с фичами для LTR-разметки по запросу
+    """
+    try:
+        from ltr_dataset_generator import LTRDatasetGenerator
+
+        generator = LTRDatasetGenerator()
+        top_k = min(request.top_k, 20)  # Максимум 20 кандидатов
+
+        candidates = generator.generate_candidates(request.query, top_k=top_k)
+
+        return {
+            'query': request.query,
+            'candidates': candidates,
+            'total': len(candidates)
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating LTR candidates: {str(e)}")
+
 if __name__ == "__main__":
     uvicorn.run(
         app,

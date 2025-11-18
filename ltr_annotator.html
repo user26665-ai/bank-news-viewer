@@ -317,6 +317,28 @@
             </div>
         </div>
 
+        <!-- Форма для добавления своих запросов -->
+        <div class="card" style="background: #f0f9ff; border: 2px dashed #667eea;">
+            <h3 style="margin-bottom: 15px; color: #667eea;">➕ Добавить свой запрос</h3>
+            <div style="display: flex; gap: 10px; align-items: flex-end;">
+                <div style="flex: 1;">
+                    <label style="font-size: 13px; color: #666; display: block; margin-bottom: 5px;">Введите запрос:</label>
+                    <input type="text" id="custom-query" placeholder="Например: ВТБ ипотека"
+                           style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                </div>
+                <div style="width: 150px;">
+                    <label style="font-size: 13px; color: #666; display: block; margin-bottom: 5px;">Кандидатов:</label>
+                    <select id="custom-topk" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                        <option value="10" selected>Топ-10</option>
+                        <option value="15">Топ-15</option>
+                        <option value="20">Топ-20</option>
+                    </select>
+                </div>
+                <button class="action-btn" onclick="addCustomQuery()" style="background: #667eea;">🔍 Найти и добавить</button>
+            </div>
+            <div id="custom-query-status" style="margin-top: 10px; font-size: 13px; color: #666;"></div>
+        </div>
+
         <div class="card" id="annotation-card">
             <div class="empty-state">
                 <h2>🎯 Готов к разметке!</h2>
@@ -556,6 +578,80 @@
             else if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 saveProgress();
+            }
+        });
+
+        // Добавление собственного запроса через API
+        async function addCustomQuery() {
+            const query = document.getElementById('custom-query').value.trim();
+            const topK = parseInt(document.getElementById('custom-topk').value);
+            const statusEl = document.getElementById('custom-query-status');
+
+            if (!query) {
+                statusEl.textContent = '❌ Введите запрос';
+                statusEl.style.color = '#e74c3c';
+                return;
+            }
+
+            statusEl.textContent = '⏳ Генерируем кандидатов...';
+            statusEl.style.color = '#3498db';
+
+            try {
+                const response = await fetch('http://localhost:8001/api/ltr/generate_candidates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        top_k: topK
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Добавляем новые кандидаты в датасет
+                dataset.push(...data.candidates);
+
+                statusEl.textContent = `✅ Добавлено ${data.total} кандидатов для "${query}"`;
+                statusEl.style.color = '#27ae60';
+
+                // Очищаем поле ввода
+                document.getElementById('custom-query').value = '';
+
+                // Обновляем статистику
+                updateStats();
+
+                // Если это первый запрос - показываем интерфейс
+                if (dataset.length === data.total) {
+                    updateUI();
+                }
+
+                // Автосохранение
+                setTimeout(() => {
+                    localStorage.setItem('ltr_dataset', JSON.stringify(dataset));
+                }, 500);
+
+            } catch (error) {
+                statusEl.textContent = `❌ Ошибка: ${error.message}. Запустите сервис (python3 news_collector_service.py)`;
+                statusEl.style.color = '#e74c3c';
+                console.error('Error:', error);
+            }
+        }
+
+        // Поддержка Enter в поле запроса
+        document.addEventListener('DOMContentLoaded', () => {
+            const queryInput = document.getElementById('custom-query');
+            if (queryInput) {
+                queryInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addCustomQuery();
+                    }
+                });
             }
         });
 
