@@ -314,7 +314,7 @@
                 <button class="action-btn" onclick="loadDataset()">📂 Загрузить датасет</button>
                 <button class="action-btn" onclick="saveProgress()">💾 Сохранить прогресс</button>
                 <button class="action-btn" onclick="exportDataset()">📥 Экспортировать CSV</button>
-                <button class="action-btn" onclick="retrainModel()" style="background: #f59e0b;">🔄 Переобучить модель</button>
+                <button id="retrain-btn" class="action-btn" onclick="retrainModel()" style="background: #f59e0b;">🔄 Переобучить модель</button>
             </div>
         </div>
 
@@ -359,7 +359,7 @@
                         <option value="20">Топ-20</option>
                     </select>
                 </div>
-                <button class="action-btn" onclick="addCustomQuery()" style="background: #667eea;">🔍 Найти и добавить</button>
+                <button id="add-query-btn" class="action-btn" onclick="addCustomQuery()" style="background: #667eea;">🔍 Найти и добавить</button>
             </div>
             <div id="custom-query-status" style="margin-top: 10px; font-size: 13px; color: #666;"></div>
         </div>
@@ -650,12 +650,18 @@
             const query = document.getElementById('custom-query').value.trim();
             const topK = parseInt(document.getElementById('custom-topk').value);
             const statusEl = document.getElementById('custom-query-status');
+            const btn = document.getElementById('add-query-btn');
 
             if (!query) {
                 statusEl.textContent = '❌ Введите запрос';
                 statusEl.style.color = '#e74c3c';
                 return;
             }
+
+            // Блокируем кнопку и показываем индикатор
+            btn.disabled = true;
+            btn.textContent = '⏳ Загрузка...';
+            btn.style.opacity = '0.6';
 
             statusEl.textContent = '⏳ Генерируем кандидатов...';
             statusEl.style.color = '#3498db';
@@ -704,6 +710,11 @@
                 statusEl.textContent = `❌ Ошибка: ${error.message}. Запустите сервис (python3 news_collector_service.py)`;
                 statusEl.style.color = '#e74c3c';
                 console.error('Error:', error);
+            } finally {
+                // Разблокируем кнопку
+                btn.disabled = false;
+                btn.textContent = '🔍 Найти и добавить';
+                btn.style.opacity = '1';
             }
         }
 
@@ -711,6 +722,7 @@
         async function retrainModel() {
             const resultsDiv = document.getElementById('retrain-results');
             const messageEl = document.getElementById('retrain-message');
+            const btn = document.getElementById('retrain-btn');
 
             // Проверяем, загружен ли датасет
             if (!dataset || dataset.length === 0) {
@@ -733,6 +745,11 @@
             if (!confirm(`Переобучить модель на ${labeledData.length} размеченных примерах?\n\nЭто займёт 10-30 секунд.`)) {
                 return;
             }
+
+            // Блокируем кнопку и показываем индикатор
+            btn.disabled = true;
+            btn.textContent = '⏳ Обучение...';
+            btn.style.opacity = '0.6';
 
             messageEl.textContent = '⏳ Переобучение модели... Это может занять 10-30 секунд.';
             messageEl.style.color = '#92400e';
@@ -803,6 +820,11 @@
                 messageEl.textContent = `❌ Ошибка при переобучении: ${error.message}`;
                 messageEl.style.color = '#dc2626';
                 console.error('Retrain error:', error);
+            } finally {
+                // Разблокируем кнопку
+                btn.disabled = false;
+                btn.textContent = '🔄 Переобучить модель';
+                btn.style.opacity = '1';
             }
         }
 
