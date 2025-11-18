@@ -21,6 +21,7 @@ import json
 import sqlite3
 
 from news_rag_system import NewsRAGSystem
+import os
 
 app = FastAPI(title="News Collector API", version="1.0")
 
@@ -33,8 +34,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Глобальный экземпляр RAG системы
-rag = NewsRAGSystem()
+# Глобальный экземпляр RAG системы (с LTR если модель существует)
+LTR_MODEL_PATH = "/Users/david/bank_news_agent/ltr_model.pkl"
+
+if os.path.exists(LTR_MODEL_PATH):
+    from integrate_ltr_model import LTRNewsRAGSystem
+    rag = LTRNewsRAGSystem(ltr_model_path=LTR_MODEL_PATH)
+    print("✓ Используется LTR-ранжирование")
+else:
+    rag = NewsRAGSystem()
+    print("ℹ Используется стандартный поиск (LTR модель не найдена)")
 
 # Конфигурация
 UPDATE_INTERVAL_SECONDS = 3600  # 1 час
@@ -62,6 +71,7 @@ class NewsItem(BaseModel):
     bank_boost: Optional[float] = 1.0
     critical_keywords: Optional[int] = 0
     geo_boost: Optional[float] = 1.0
+    ltr_score: Optional[float] = None  # LTR-скор если модель доступна
     entities: Optional[List[EntityTag]] = []
 
 class SearchResponse(BaseModel):
@@ -572,10 +582,11 @@ def get_news_entities_tags(news_id: int) -> List[EntityTag]:
 @app.post("/search", response_model=SearchResponse)
 async def search_news(request: SearchRequest):
     """
-    Поиск новостей (гибридный: текст + векторный + банковская приоритезация)
+    Поиск новостей (с LTR-переранжированием если доступно)
     """
     try:
-        results = hybrid_search_internal(request.query, request.top_k)
+        # Используем rag.search_similar который автоматически применяет LTR если модель загружена
+        results = rag.search_similar(request.query, top_k=request.top_k)
 
         news_items = []
         for item in results:
@@ -589,12 +600,13 @@ async def search_news(request: SearchRequest):
                 link=item['link'],
                 source=item['source'],
                 published=item['published'],
-                similarity=item['similarity'],
+                similarity=item.get('similarity', 0),
                 keyword_score=item.get('keyword_score', 0),
                 vector_score=item.get('vector_score', 0),
                 bank_boost=item.get('bank_boost', 1.0),
                 critical_keywords=item.get('critical_keywords', 0),
                 geo_boost=item.get('geo_boost', 1.0),
+                ltr_score=item.get('ltr_score', None),  # LTR-скор если есть
                 entities=entities
             ))
 
