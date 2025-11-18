@@ -314,7 +314,32 @@
                 <button class="action-btn" onclick="loadDataset()">📂 Загрузить датасет</button>
                 <button class="action-btn" onclick="saveProgress()">💾 Сохранить прогресс</button>
                 <button class="action-btn" onclick="exportDataset()">📥 Экспортировать CSV</button>
+                <button class="action-btn" onclick="retrainModel()" style="background: #f59e0b;">🔄 Переобучить модель</button>
             </div>
+        </div>
+
+        <!-- Результаты переобучения -->
+        <div id="retrain-results" class="card" style="display: none; background: #fef3c7; border: 2px solid #f59e0b;">
+            <h3 style="margin-bottom: 15px; color: #92400e;">📊 Результаты переобучения</h3>
+            <div id="retrain-message" style="margin-bottom: 20px; font-size: 15px;"></div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                <div style="background: white; padding: 15px; border-radius: 8px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #3b82f6;" id="retrain-ndcg">-</div>
+                    <div style="font-size: 13px; color: #666;">Validation NDCG</div>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 8px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #10b981;" id="retrain-samples">-</div>
+                    <div style="font-size: 13px; color: #666;">Обучающая выборка</div>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 8px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #8b5cf6;" id="retrain-queries">-</div>
+                    <div style="font-size: 13px; color: #666;">Уникальных запросов</div>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 20px; margin-bottom: 10px; color: #92400e;">Изменения в важности фичей:</h4>
+            <div id="feature-changes" style="font-family: monospace; font-size: 13px;"></div>
         </div>
 
         <!-- Форма для добавления своих запросов -->
@@ -640,6 +665,95 @@
                 statusEl.textContent = `❌ Ошибка: ${error.message}. Запустите сервис (python3 news_collector_service.py)`;
                 statusEl.style.color = '#e74c3c';
                 console.error('Error:', error);
+            }
+        }
+
+        // Переобучение модели
+        async function retrainModel() {
+            const resultsDiv = document.getElementById('retrain-results');
+            const messageEl = document.getElementById('retrain-message');
+
+            // Проверяем, есть ли размеченные данные
+            const labeledData = dataset.filter(item => item.label !== null);
+
+            if (labeledData.length < 10) {
+                alert(`Недостаточно размеченных данных: ${labeledData.length}. Нужно минимум 10 размеченных примеров.`);
+                return;
+            }
+
+            if (!confirm(`Переобучить модель на ${labeledData.length} размеченных примерах?\n\nЭто займёт 10-30 секунд.`)) {
+                return;
+            }
+
+            messageEl.textContent = '⏳ Переобучение модели... Это может занять 10-30 секунд.';
+            messageEl.style.color = '#92400e';
+            resultsDiv.style.display = 'block';
+
+            try {
+                const response = await fetch('http://localhost:8001/api/ltr/retrain', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        dataset: dataset
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || `HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                // Отображаем результат
+                messageEl.textContent = `✅ ${result.message}`;
+                messageEl.style.color = '#15803d';
+
+                // Метрики
+                document.getElementById('retrain-ndcg').textContent = result.metrics.val_ndcg.toFixed(4);
+                document.getElementById('retrain-samples').textContent = result.metrics.n_train_samples;
+                document.getElementById('retrain-queries').textContent = result.metrics.n_queries_total;
+
+                // Визуализация изменений фичей
+                const changesDiv = document.getElementById('feature-changes');
+                changesDiv.innerHTML = '';
+
+                // Сортируем фичи по абсолютному изменению
+                const sortedFeatures = Object.entries(result.changes)
+                    .sort((a, b) => Math.abs(b[1].delta) - Math.abs(a[1].delta));
+
+                sortedFeatures.forEach(([feature, change]) => {
+                    const row = document.createElement('div');
+                    row.style.padding = '8px';
+                    row.style.borderBottom = '1px solid #e5e7eb';
+                    row.style.display = 'grid';
+                    row.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
+                    row.style.alignItems = 'center';
+                    row.style.gap = '10px';
+
+                    const isIncrease = change.delta > 0;
+                    const deltaColor = isIncrease ? '#10b981' : '#ef4444';
+                    const arrow = isIncrease ? '↑' : '↓';
+
+                    row.innerHTML = `
+                        <div style="font-weight: 600;">${feature}</div>
+                        <div style="color: #666;">${change.old.toFixed(0)} → ${change.new.toFixed(0)}</div>
+                        <div style="color: ${deltaColor}; font-weight: bold;">${arrow} ${Math.abs(change.delta).toFixed(0)}</div>
+                        <div style="color: ${deltaColor}; font-size: 12px;">(${change.delta_percent > 0 ? '+' : ''}${change.delta_percent.toFixed(1)}%)</div>
+                    `;
+
+                    changesDiv.appendChild(row);
+                });
+
+                // Показываем информацию о бэкапе
+                console.log(`Старая модель сохранена как: ${result.backup_file}`);
+
+            } catch (error) {
+                messageEl.textContent = `❌ Ошибка при переобучении: ${error.message}`;
+                messageEl.style.color = '#dc2626';
+                console.error('Retrain error:', error);
             }
         }
 

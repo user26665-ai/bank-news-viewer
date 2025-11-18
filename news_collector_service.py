@@ -13,7 +13,7 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict
 import uvicorn
 import asyncio
 from datetime import datetime, timedelta
@@ -1226,6 +1226,181 @@ async def generate_ltr_candidates(request: SearchRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating LTR candidates: {str(e)}")
+
+
+class RetrainRequest(BaseModel):
+    """Запрос на переобучение модели с размеченным датасетом"""
+    dataset: List[Dict]  # Список размеченных пар {query, news_id, features, label}
+
+
+@app.post("/api/ltr/retrain")
+async def retrain_ltr_model(request: RetrainRequest):
+    """
+    Переобучает LTR модель на размеченном датасете
+    Возвращает старые и новые feature importances
+    """
+    try:
+        import pandas as pd
+        import numpy as np
+        from sklearn.model_selection import train_test_split
+        from lightgbm import LGBMRanker
+        import pickle
+        from datetime import datetime
+
+        # 1. Получаем старые feature importances
+        global rag_ltr
+        old_importances = {}
+        if hasattr(rag_ltr, 'ltr_model') and rag_ltr.ltr_model:
+            feature_names = rag_ltr.feature_columns
+            importances = rag_ltr.ltr_model.feature_importances_
+            old_importances = {name: float(imp) for name, imp in zip(feature_names, importances)}
+
+        # 2. Фильтруем только размеченные данные (label не null)
+        labeled_data = [item for item in request.dataset if item.get('label') is not None]
+
+        if len(labeled_data) < 10:
+            raise HTTPException(status_code=400, detail=f"Недостаточно размеченных данных: {len(labeled_data)}. Нужно минимум 10.")
+
+        # 3. Подготавливаем данные для обучения
+        df = pd.DataFrame(labeled_data)
+
+        # Извлекаем фичи из словаря features
+        feature_columns = list(labeled_data[0]['features'].keys())
+        X = np.array([list(item['features'].values()) for item in labeled_data])
+        y = df['label'].values
+
+        # Группы запросов (для LTR важно!)
+        queries = df['query'].values
+        query_groups = []
+        current_query = None
+        current_count = 0
+
+        for q in queries:
+            if q != current_query:
+                if current_count > 0:
+                    query_groups.append(current_count)
+                current_query = q
+                current_count = 1
+            else:
+                current_count += 1
+        query_groups.append(current_count)
+
+        # 4. Train/val split (80/20)
+        n_queries = len(query_groups)
+        split_idx = int(0.8 * n_queries)
+
+        train_size = sum(query_groups[:split_idx])
+
+        X_train = X[:train_size]
+        y_train = y[:train_size]
+        train_groups = query_groups[:split_idx]
+
+        X_val = X[train_size:]
+        y_val = y[train_size:]
+        val_groups = query_groups[split_idx:]
+
+        # 5. Обучаем новую модель
+        model = LGBMRanker(
+            objective='lambdarank',
+            metric='ndcg',
+            n_estimators=100,
+            learning_rate=0.05,
+            num_leaves=31,
+            max_depth=6,
+            min_child_samples=5,
+            random_state=42,
+            n_jobs=-1
+        )
+
+        model.fit(
+            X_train, y_train,
+            group=train_groups,
+            eval_set=[(X_val, y_val)],
+            eval_group=[val_groups],
+            eval_metric='ndcg',
+            callbacks=[],
+        )
+
+        # 6. Получаем новые feature importances
+        new_importances = {name: float(imp) for name, imp in zip(feature_columns, model.feature_importances_)}
+
+        # 7. Вычисляем изменения
+        changes = {}
+        for feature in feature_columns:
+            old_val = old_importances.get(feature, 0)
+            new_val = new_importances.get(feature, 0)
+            changes[feature] = {
+                'old': old_val,
+                'new': new_val,
+                'delta': new_val - old_val,
+                'delta_percent': ((new_val - old_val) / old_val * 100) if old_val > 0 else 0
+            }
+
+        # 8. Сохраняем модель
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # Backup старой модели
+        import shutil
+        if os.path.exists('ltr_model.pkl'):
+            shutil.copy('ltr_model.pkl', f'ltr_model_backup_{timestamp}.pkl')
+
+        # Сохраняем новую модель
+        model_data = {
+            'model': model,
+            'feature_columns': feature_columns,
+            'trained_on': timestamp,
+            'n_samples': len(labeled_data),
+            'n_queries': len(set(df['query']))
+        }
+
+        with open('ltr_model.pkl', 'wb') as f:
+            pickle.dump(model_data, f)
+
+        # 9. Перезагружаем модель в памяти
+        rag_ltr.ltr_model = model
+        rag_ltr.feature_columns = feature_columns
+
+        # 10. Вычисляем метрики на валидации
+        from sklearn.metrics import ndcg_score
+
+        # Предсказания на валидации
+        y_pred_val = model.predict(X_val)
+
+        # NDCG по группам
+        ndcg_scores = []
+        start_idx = 0
+        for group_size in val_groups:
+            end_idx = start_idx + group_size
+            y_true_group = y_val[start_idx:end_idx].reshape(1, -1)
+            y_pred_group = y_pred_val[start_idx:end_idx].reshape(1, -1)
+
+            if len(y_true_group[0]) > 0:
+                ndcg = ndcg_score(y_true_group, y_pred_group)
+                ndcg_scores.append(ndcg)
+
+            start_idx = end_idx
+
+        avg_ndcg = float(np.mean(ndcg_scores)) if ndcg_scores else 0.0
+
+        return {
+            'success': True,
+            'message': f'Модель переобучена на {len(labeled_data)} примерах ({len(set(df["query"]))} запросов)',
+            'old_importances': old_importances,
+            'new_importances': new_importances,
+            'changes': changes,
+            'metrics': {
+                'val_ndcg': avg_ndcg,
+                'n_train_samples': len(X_train),
+                'n_val_samples': len(X_val),
+                'n_queries_total': len(set(df['query'])),
+            },
+            'backup_file': f'ltr_model_backup_{timestamp}.pkl'
+        }
+
+    except Exception as e:
+        import traceback
+        raise HTTPException(status_code=500, detail=f"Error retraining model: {str(e)}\n{traceback.format_exc()}")
+
 
 if __name__ == "__main__":
     uvicorn.run(
