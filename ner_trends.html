@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Тренды упоминания NER-сущностей</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .controls h2 {
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-item label {
+            color: #666;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .control-item select,
+        .control-item input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .control-item select:focus,
+        .control-item input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .chart-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            color: #667eea;
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            font-size: 1.3em;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .entity-list {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .entity-list h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .entity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        .entity-item:hover {
+            background: #f8f9fa;
+        }
+
+        .entity-item:last-child {
+            border-bottom: none;
+        }
+
+        .entity-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .entity-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .control-group {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wrapper {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Тренды упоминания NER-сущностей</h1>
+            <p class="subtitle">Анализ частоты упоминаний персон, организаций и локаций в новостях</p>
+        </div>
+
+        <div id="error-container"></div>
+
+        <div class="controls">
+            <h2>⚙️ Настройки графика</h2>
+            <div class="control-group">
+                <div class="control-item">
+                    <label for="days">Период (дней)</label>
+                    <select id="days">
+                        <option value="7">Последние 7 дней</option>
+                        <option value="14">Последние 14 дней</option>
+                        <option value="30" selected>Последние 30 дней</option>
+                        <option value="60">Последние 60 дней</option>
+                        <option value="90">Последние 90 дней</option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <label for="entity-type">Тип сущности</label>
+                    <select id="entity-type">
+                        <option value="">Все типы</option>
+                        <option value="person">👤 Персоны</option>
+                        <option value="organization">🏢 Организации</option>
+                        <option value="location">📍 Локации</option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <label for="top-n">Количество сущностей</label>
+                    <select id="top-n">
+                        <option value="5">Топ 5</option>
+                        <option value="10" selected>Топ 10</option>
+                        <option value="15">Топ 15</option>
+                        <option value="20">Топ 20</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="loadTrends()">🔄 Обновить график</button>
+        </div>
+
+        <div class="stats-grid" id="stats-container" style="display: none;">
+            <div class="stat-card">
+                <h3>Период анализа</h3>
+                <div class="value" id="stat-period">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Тип сущностей</h3>
+                <div class="value" id="stat-type">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Показано сущностей</h3>
+                <div class="value" id="stat-count">-</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2>📈 График упоминаний по дням</h2>
+            <div id="loading-container" class="loading" style="display: none;">⏳ Загрузка данных...</div>
+            <div class="chart-wrapper" id="chart-wrapper">
+                <canvas id="trendsChart"></canvas>
+            </div>
+        </div>
+
+        <div class="entity-list" id="entity-list-container" style="display: none;">
+            <h2>🏆 Топ упоминаемых сущностей</h2>
+            <div id="entity-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8001';
+        let trendsChart = null;
+
+        // Цветовая палитра для графиков
+        const colors = [
+            '#667eea', '#764ba2', '#f093fb', '#4facfe',
+            '#43e97b', '#fa709a', '#feca57', '#ff6348',
+            '#00d2ff', '#a8edea', '#fed6e3', '#c471f5',
+            '#12c2e9', '#f64f59', '#96e6a1', '#d299c2'
+        ];
+
+        // Загрузка трендов при старте
+        window.onload = function() {
+            loadTrends();
+        };
+
+        async function loadTrends() {
+            const days = document.getElementById('days').value;
+            const entityType = document.getElementById('entity-type').value;
+            const topN = document.getElementById('top-n').value;
+
+            showLoading();
+            hideError();
+
+            try {
+                let url = `${API_URL}/entities/trends?days=${days}&top_n=${topN}`;
+                if (entityType) {
+                    url += `&entity_type=${entityType}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                displayTrends(data);
+
+                // Показываем статистику и список только если есть данные
+                if (data.datasets && data.datasets.length > 0) {
+                    displayStats(data);
+                    displayEntityList(data);
+                    document.getElementById('stats-container').style.display = 'grid';
+                    document.getElementById('entity-list-container').style.display = 'block';
+                }
+
+            } catch (error) {
+                showError('Ошибка загрузки данных: ' + error.message);
+            }
+        }
+
+        function displayTrends(data) {
+            hideLoading();
+
+            // Проверяем есть ли данные
+            if (!data.datasets || data.datasets.length === 0) {
+                document.getElementById('loading-container').innerHTML =
+                    '<div class="loading">📭 Нет данных за выбранный период</div>';
+                document.getElementById('loading-container').style.display = 'block';
+                return;
+            }
+
+            const ctx = document.getElementById('trendsChart').getContext('2d');
+
+            // Уничтожаем старый график если есть
+            if (trendsChart) {
+                trendsChart.destroy();
+            }
+
+            // Подготавливаем datasets с цветами
+            const datasets = data.datasets.map((dataset, index) => ({
+                label: dataset.label,
+                data: dataset.data,
+                borderColor: colors[index % colors.length],
+                backgroundColor: colors[index % colors.length] + '20',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true,
+                pointRadius: 3,
+                pointHoverRadius: 6
+            }));
+
+            // Форматируем даты для отображения
+            const labels = data.dates.map(date => {
+                const d = new Date(date);
+                return d.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' });
+            });
+
+            trendsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + ' упоминаний';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayStats(data) {
+            const typeNames = {
+                'person': '👤 Персоны',
+                'organization': '🏢 Организации',
+                'location': '📍 Локации',
+                'all': '🌐 Все типы'
+            };
+
+            document.getElementById('stat-period').textContent = data.period_days + ' дн.';
+            document.getElementById('stat-type').textContent = typeNames[data.entity_type] || data.entity_type;
+            document.getElementById('stat-count').textContent = data.datasets.length;
+        }
+
+        function displayEntityList(data) {
+            const container = document.getElementById('entity-list');
+
+            // Вычисляем общее количество упоминаний для каждой сущности
+            const entityTotals = data.datasets.map(dataset => ({
+                name: dataset.label,
+                total: dataset.data.reduce((sum, val) => sum + val, 0)
+            }));
+
+            // Сортируем по количеству
+            entityTotals.sort((a, b) => b.total - a.total);
+
+            let html = '';
+            entityTotals.forEach((entity, index) => {
+                html += `
+                    <div class="entity-item">
+                        <span class="entity-name">${index + 1}. ${entity.name}</span>
+                        <span class="entity-count">${entity.total} упоминаний</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function showLoading() {
+            const loadingEl = document.getElementById('loading-container');
+            loadingEl.innerHTML = '⏳ Загрузка данных...';
+            loadingEl.style.display = 'block';
+            document.getElementById('chart-wrapper').style.display = 'none';
+            document.getElementById('stats-container').style.display = 'none';
+            document.getElementById('entity-list-container').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-container').style.display = 'none';
+            document.getElementById('chart-wrapper').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('error-container').innerHTML =
+                `<div class="error">❌ ${message}</div>`;
+        }
+
+        function hideError() {
+            document.getElementById('error-container').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
